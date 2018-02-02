@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class, style)
+import Mouse
 
 
 main =
@@ -47,12 +48,14 @@ init { windowWidth, windowHeight } =
 
 
 type Msg
-    = NoOp
+    = MouseMove Mouse.Position
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    model ! []
+    case msg of
+        MouseMove { x, y } ->
+            { model | hero = ( x, y ) } ! []
 
 
 
@@ -61,7 +64,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Mouse.moves MouseMove
 
 
 
@@ -79,7 +82,7 @@ view ({ egg, hero } as model) =
 viewEgg : ( Int, Int ) -> Html Msg
 viewEgg (( x, y ) as egg) =
     div
-        [ class "egg"
+        [ class "egg sprite"
         , style
             [ ( "transform", "translate(" ++ px x ++ "," ++ px y ++ ")" )
             ]
@@ -90,7 +93,7 @@ viewEgg (( x, y ) as egg) =
 viewHero : ( Int, Int ) -> Html Msg
 viewHero (( x, y ) as hero) =
     div
-        [ class "hero"
+        [ class "hero sprite"
         , style
             [ ( "transform", "translate(" ++ px x ++ "," ++ px y ++ ")" )
             ]

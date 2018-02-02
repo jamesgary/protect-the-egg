@@ -3,26 +3,28 @@ html, body {
   background: #afa;
 }
 
+.sprite {
+  border-radius: 100%;
+  position: absolute;
+  box-sizing: border-box;
+}
+
 .egg {
   width: 100px;
   height: 100px;
   background: white;
-  border-radius: 100%;
   border: 2px solid #444;
   top: -50px;
   left: -50px;
-  position: absolute;
 }
 
 .hero {
   width: 20px;
   height: 20px;
   background: #639;
-  border-radius: 100%;
   border: 2px solid #407;
   top: -10px;
   left: -10px;
-  position: absolute;
 }
 
 
