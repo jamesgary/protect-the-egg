@@ -1,5 +1,7 @@
 # Safety Game
 
+Play the work in progress here: http://elm-game-jam-feb-2017.s3-website-us-east-1.amazonaws.com
+
 Protect egg!
 
 First steps...
