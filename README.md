@@ -6,10 +6,10 @@ First steps...
 - [x] Draw egg (just a cirlce)
 - [x] Draw hero (another cirlce)
 - [x] Hero follows mouse
-- [ ] Make hero semi-circle and rotate around egg
-- [ ] Draw/move enemies
-- [ ] Collide with egg
+- [x] Draw/move enemies
 - [ ] Collide with hero
+- [ ] Collide with egg
+- [ ] Make hero semi-circle and rotate around egg
 
 Iterate!
 
