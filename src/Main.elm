@@ -30,6 +30,7 @@ type alias Model =
     , egg : Egg
     , hero : Hero
     , enemies : List Enemy
+    , isGameOver : Bool
     }
 
 
@@ -40,24 +41,50 @@ type alias Flag =
 
 
 type alias Egg =
-    ( Float, Float )
+    { pos : Pos
+    , rad : Float
+    }
+
+
+type alias Pos =
+    { x : Float
+    , y : Float
+    }
 
 
 type alias Hero =
-    ( Float, Float )
+    { pos : Pos
+    , rad : Float
+    }
 
 
 type alias Enemy =
-    ( Float, Float )
+    { pos : Pos
+    , rad : Float
+    }
 
 
 init : Flag -> ( Model, Cmd Msg )
 init { windowWidth, windowHeight } =
-    ( { egg = ( toFloat windowWidth / 2, toFloat windowHeight / 2 )
-      , windowWidth = windowWidth
+    ( { windowWidth = windowWidth
       , windowHeight = windowHeight
-      , hero = ( 300, 100 )
-      , enemies = [ ( 30, 30 ) ]
+      , egg =
+            { pos =
+                { x = toFloat windowWidth / 2
+                , y = toFloat windowHeight / 2
+                }
+            , rad = 50
+            }
+      , hero =
+            { pos = { x = 300, y = 100 }
+            , rad = 25
+            }
+      , enemies =
+            [ { pos = { x = 30, y = 30 }
+              , rad = 10
+              }
+            ]
+      , isGameOver = False
       }
     , Cmd.none
     )
@@ -76,22 +103,68 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         MouseMove { x, y } ->
-            { model | hero = ( toFloat x, toFloat y ) } ! []
+            moveHero (Pos (toFloat x) (toFloat y)) model ! []
 
         Tick timeDelta ->
             tick timeDelta model ! []
 
 
+moveHero : Pos -> Model -> Model
+moveHero mousePos ({ hero } as model) =
+    let
+        newHero =
+            { hero | pos = mousePos }
+    in
+    { model | hero = newHero }
+
+
 tick : Time -> Model -> Model
-tick timeDelta ({ egg, enemies } as model) =
-    { model | enemies = List.map (moveEnemyCloserToEgg timeDelta egg) enemies }
+tick timeDelta ({ egg, enemies, hero } as model) =
+    let
+        movedEnemies =
+            List.map (moveEnemyCloserToEgg timeDelta egg) enemies
+                |> List.filterMap (doesCollideWithHero hero)
+
+        isGameOver =
+            List.any (doesCollideWithEgg egg) movedEnemies
+    in
+    { model
+        | enemies = movedEnemies
+        , isGameOver = isGameOver
+    }
+
+
+doesCollideWithEgg : Egg -> Enemy -> Bool
+doesCollideWithEgg egg enemy =
+    let
+        dist_ =
+            dist egg.pos enemy.pos
+    in
+    dist_ < (egg.rad + enemy.rad)
+
+
+doesCollideWithHero : Hero -> Enemy -> Maybe Enemy
+doesCollideWithHero hero enemy =
+    let
+        dist_ =
+            dist hero.pos enemy.pos
+    in
+    if dist_ < (hero.rad + enemy.rad) then
+        Nothing
+    else
+        Just enemy
+
+
+dist : Pos -> Pos -> Float
+dist pos1 pos2 =
+    sqrt ((pos1.x - pos2.x) ^ 2 + (pos1.y - pos2.y) ^ 2)
 
 
 moveEnemyCloserToEgg : Time -> Egg -> Enemy -> Enemy
-moveEnemyCloserToEgg timeDelta ( eggX, eggY ) ( enemyX, enemyY ) =
-    toPolar ( eggX - enemyX, eggY - enemyY )
+moveEnemyCloserToEgg timeDelta egg enemy =
+    toPolar ( egg.pos.x - enemy.pos.x, egg.pos.y - enemy.pos.y )
         |> (\( _, angle ) -> fromPolar ( timeDelta * enemySpeed, angle ))
-        |> (\( x, y ) -> ( enemyX + x, enemyY + y ))
+        |> (\( x, y ) -> { enemy | pos = { x = enemy.pos.x + x, y = enemy.pos.y + y } })
 
 
 
@@ -111,9 +184,10 @@ subscriptions model =
 
 
 view : Model -> Html Msg
-view ({ egg, hero, enemies } as model) =
+view ({ egg, hero, enemies, isGameOver } as model) =
     div [ class "container" ]
-        ([ viewEgg egg
+        ([ viewGameOver isGameOver
+         , viewEgg egg
          , viewHero hero
          ]
             ++ List.map viewEnemy enemies
@@ -121,36 +195,78 @@ view ({ egg, hero, enemies } as model) =
 
 
 viewEgg : Egg -> Html Msg
-viewEgg (( x, y ) as egg) =
+viewEgg { pos, rad } =
     div
         [ class "egg sprite"
         , style
-            [ ( "transform", "translate(" ++ px x ++ "," ++ px y ++ ")" )
+            [ ( "transform"
+              , "translate("
+                    ++ px pos.x
+                    ++ ","
+                    ++ px pos.y
+                    ++ ")"
+              )
+            , ( "width", px (2 * rad) )
+            , ( "height", px (2 * rad) )
+            , ( "top", px (-1 * rad) )
+            , ( "left", px (-1 * rad) )
             ]
         ]
         []
 
 
 viewHero : Hero -> Html Msg
-viewHero (( x, y ) as hero) =
+viewHero { pos, rad } =
     div
         [ class "hero sprite"
         , style
-            [ ( "transform", "translate(" ++ px x ++ "," ++ px y ++ ")" )
+            [ ( "transform"
+              , "translate("
+                    ++ px pos.x
+                    ++ ","
+                    ++ px pos.y
+                    ++ ")"
+              )
+            , ( "width", px (2 * rad) )
+            , ( "height", px (2 * rad) )
+            , ( "top", px (-1 * rad) )
+            , ( "left", px (-1 * rad) )
             ]
         ]
         []
 
 
 viewEnemy : Enemy -> Html Msg
-viewEnemy (( x, y ) as hero) =
+viewEnemy { pos, rad } =
     div
         [ class "enemy sprite"
         , style
-            [ ( "transform", "translate(" ++ px x ++ "," ++ px y ++ ")" )
+            [ ( "transform"
+              , "translate("
+                    ++ px pos.x
+                    ++ ","
+                    ++ px pos.y
+                    ++ ")"
+              )
+            , ( "width", px (2 * rad) )
+            , ( "height", px (2 * rad) )
+            , ( "top", px (-1 * rad) )
+            , ( "left", px (-1 * rad) )
             ]
         ]
         []
+
+
+viewGameOver : Bool -> Html Msg
+viewGameOver isGameOver =
+    if isGameOver then
+        div [ class "game-over-container" ]
+            [ h1
+                [ class "game-over" ]
+                [ text "GAME OVER!" ]
+            ]
+    else
+        text ""
 
 
 px : number -> String

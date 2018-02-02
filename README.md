@@ -7,8 +7,8 @@ First steps...
 - [x] Draw hero (another cirlce)
 - [x] Hero follows mouse
 - [x] Draw/move enemies
-- [ ] Collide with hero
-- [ ] Collide with egg
+- [x] Collide with hero
+- [x] Collide with egg
 - [ ] Make hero semi-circle and rotate around egg
 
 Iterate!
