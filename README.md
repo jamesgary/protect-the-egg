@@ -9,7 +9,13 @@ First steps...
 - [x] Draw/move enemies
 - [x] Collide with hero
 - [x] Collide with egg
-- [ ] Make hero semi-circle and rotate around egg
+- [x] Make hero semi-circle and rotate around egg
+
+Next steps:
+- [ ] Fix collision with new semi-circle hero
+- [ ] Random enemy position upon start up
+- [ ] Trickle of enemies
+- [ ] Hero slowly moves towards cursor (doesn't snap)
 
 Iterate!
 

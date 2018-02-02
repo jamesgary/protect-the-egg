@@ -23,6 +23,7 @@ html, body {
 }
 
 .hero {
+  border-radius: 0;
   background: #639;
   border: 2px solid #407;
 }

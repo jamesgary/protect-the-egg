@@ -55,6 +55,7 @@ type alias Pos =
 type alias Hero =
     { pos : Pos
     , rad : Float
+    , angle : Float
     }
 
 
@@ -78,11 +79,16 @@ init { windowWidth, windowHeight } =
       , hero =
             { pos = { x = 300, y = 100 }
             , rad = 25
+            , angle = 0
             }
       , enemies =
-            [ { pos = { x = 30, y = 30 }
-              , rad = 10
-              }
+            [ { pos = { x = 30, y = 30 }, rad = 10 }
+            , { pos = { x = 30, y = 130 }, rad = 10 }
+            , { pos = { x = 130, y = 30 }, rad = 10 }
+            , { pos = { x = 230, y = 30 }, rad = 10 }
+            , { pos = { x = 30, y = 230 }, rad = 10 }
+            , { pos = { x = 330, y = 30 }, rad = 10 }
+            , { pos = { x = 30, y = 330 }, rad = 10 }
             ]
       , isGameOver = False
       }
@@ -103,19 +109,23 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         MouseMove { x, y } ->
-            moveHero (Pos (toFloat x) (toFloat y)) model ! []
+            moveHero (Pos (toFloat x) (toFloat y)) model.egg.pos model ! []
 
         Tick timeDelta ->
             tick timeDelta model ! []
 
 
-moveHero : Pos -> Model -> Model
-moveHero mousePos ({ hero } as model) =
-    let
-        newHero =
-            { hero | pos = mousePos }
-    in
-    { model | hero = newHero }
+moveHero : Pos -> Pos -> Model -> Model
+moveHero mousePos eggPos ({ hero } as model) =
+    { model
+        | hero =
+            { hero
+                | pos = mousePos
+                , angle =
+                    toPolar ( eggPos.x - hero.pos.x, eggPos.y - hero.pos.y )
+                        |> (\( _, angle ) -> angle + turns 0.25)
+            }
+    }
 
 
 tick : Time -> Model -> Model
@@ -216,7 +226,7 @@ viewEgg { pos, rad } =
 
 
 viewHero : Hero -> Html Msg
-viewHero { pos, rad } =
+viewHero { pos, rad, angle } =
     div
         [ class "hero sprite"
         , style
@@ -226,11 +236,16 @@ viewHero { pos, rad } =
                     ++ ","
                     ++ px pos.y
                     ++ ")"
+                    ++ " rotate("
+                    ++ toString angle
+                    ++ "rad)"
               )
             , ( "width", px (2 * rad) )
-            , ( "height", px (2 * rad) )
-            , ( "top", px (-1 * rad) )
+            , ( "height", px rad )
+            , ( "top", px (-0.5 * rad) )
             , ( "left", px (-1 * rad) )
+            , ( "border-bottom-left-radius", px (2 * rad) )
+            , ( "border-bottom-right-radius", px (2 * rad) )
             ]
         ]
         []
