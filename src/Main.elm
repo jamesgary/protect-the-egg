@@ -21,6 +21,7 @@ type alias Model =
     { windowWidth : Int
     , windowHeight : Int
     , egg : ( Int, Int )
+    , hero : ( Int, Int )
     }
 
 
@@ -35,6 +36,7 @@ init { windowWidth, windowHeight } =
     ( { egg = ( windowWidth // 2, windowHeight // 2 )
       , windowWidth = windowWidth
       , windowHeight = windowHeight
+      , hero = ( 300, 100 )
       }
     , Cmd.none
     )
@@ -67,13 +69,28 @@ subscriptions model =
 
 
 view : Model -> Html Msg
-view ({ egg } as model) =
-    let
-        ( x, y ) =
-            egg
-    in
+view ({ egg, hero } as model) =
+    div [ class "container" ]
+        [ viewEgg egg
+        , viewHero hero
+        ]
+
+
+viewEgg : ( Int, Int ) -> Html Msg
+viewEgg (( x, y ) as egg) =
     div
         [ class "egg"
+        , style
+            [ ( "transform", "translate(" ++ px x ++ "," ++ px y ++ ")" )
+            ]
+        ]
+        []
+
+
+viewHero : ( Int, Int ) -> Html Msg
+viewHero (( x, y ) as hero) =
+    div
+        [ class "hero"
         , style
             [ ( "transform", "translate(" ++ px x ++ "," ++ px y ++ ")" )
             ]

@@ -3,14 +3,13 @@
 Protect egg!
 
 First steps...
-- Draw screen
-- Draw egg (circle)
-- Draw paddle (square)
-- Paddle follows mouse
-- Make paddle semi-circle and rotate around egg
-- Draw/move enemies
-- Collide with egg
-- Collide with paddle
+- [x] Draw egg (just a cirlce)
+- [x] Draw hero (another cirlce)
+- [ ] Hero follows mouse
+- [ ] Make hero semi-circle and rotate around egg
+- [ ] Draw/move enemies
+- [ ] Collide with egg
+- [ ] Collide with hero
 
 Iterate!
 
