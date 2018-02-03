@@ -5,6 +5,7 @@ import Common exposing (..)
 import Game.TwoD.Camera exposing (viewportToGameCoordinates)
 import Html
 import Mouse
+import Random
 import Time exposing (Time)
 import View exposing (view)
 
@@ -27,7 +28,14 @@ enemySpeed =
 
 
 init : Flag -> ( Model, Cmd Msg )
-init { windowWidth, windowHeight } =
+init { windowWidth, windowHeight, timestamp } =
+    let
+        seed =
+            Random.initialSeed timestamp
+
+        ( enemies, newSeed ) =
+            initEnemies seed
+    in
     ( { windowWidth = windowWidth
       , windowHeight = windowHeight
       , egg =
@@ -42,16 +50,35 @@ init { windowWidth, windowHeight } =
             , rad = 7
             , angle = 0
             }
-      , enemies =
-            [ { pos = { x = 50, y = 50 }, rad = 2 }
-            , { pos = { x = 50, y = -50 }, rad = 2 }
-            , { pos = { x = -50, y = 50 }, rad = 2 }
-            , { pos = { x = -50, y = -50 }, rad = 2 }
-            ]
+      , enemies = enemies
       , isGameOver = False
+      , seed = newSeed
       }
     , Cmd.none
     )
+
+
+initEnemies : Random.Seed -> ( List Enemy, Random.Seed )
+initEnemies seed =
+    Random.step (Random.list 10 enemyGenerator) seed
+
+
+enemyStartingDistFromEgg =
+    100
+
+
+enemyGenerator : Random.Generator Enemy
+enemyGenerator =
+    Random.float 0 (turns 1)
+        |> Random.map
+            (\angle ->
+                fromPolar ( enemyStartingDistFromEgg, angle )
+                    |> (\( x, y ) ->
+                            { pos = { x = x, y = y }
+                            , rad = 2
+                            }
+                       )
+            )
 
 
 

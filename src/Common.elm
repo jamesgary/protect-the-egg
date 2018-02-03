@@ -2,6 +2,7 @@ module Common exposing (..)
 
 import Game.TwoD.Camera as Camera exposing (Camera)
 import Mouse
+import Random
 import Time exposing (Time)
 
 
@@ -12,12 +13,14 @@ type alias Model =
     , hero : Hero
     , enemies : List Enemy
     , isGameOver : Bool
+    , seed : Random.Seed
     }
 
 
 type alias Flag =
     { windowWidth : Int
     , windowHeight : Int
+    , timestamp : Int
     }
 
 

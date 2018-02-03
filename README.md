@@ -4,7 +4,7 @@ Play the work in progress here: http://elm-game-jam-feb-2017.s3-website-us-east-
 
 Protect egg!
 
-First steps...
+Day 1
 - [x] Draw egg (just a cirlce)
 - [x] Draw hero (another cirlce)
 - [x] Hero follows mouse
@@ -13,12 +13,15 @@ First steps...
 - [x] Collide with egg
 - [x] Make hero semi-circle and rotate around egg
 
+Day 3
+- [x] Use webgl
+- [x] Random enemy position upon start up
+
 Next steps:
-- [ ] Fix collision with new semi-circle hero
-- [ ] Random enemy position upon start up
-- [ ] Trickle of enemies
+- [ ] Trickle of enemies (every X ms, an enemy spawns randomly around egg)
+- [ ] Use the sword as a sword
 - [ ] Hero slowly moves towards cursor (doesn't snap)
-- [ ] Use webgl
+- [ ] Fix collision with new semi-circle hero
 
 Future steps:
 - [ ] Start Screen
