@@ -18,6 +18,29 @@ Next steps:
 - [ ] Random enemy position upon start up
 - [ ] Trickle of enemies
 - [ ] Hero slowly moves towards cursor (doesn't snap)
+- [ ] Use webgl
+
+Future steps:
+- [ ] Start Screen
+- [ ] Actual Level
+- [ ] Onboarding/Tutorial
+- [ ] Sound
+- [ ] Music
+- [ ] Save progress
+
+Possible heroes archetypes:
+- Sword (long and pointy)
+  - Mouse holds the hilt, rotates around egg
+  - Moves fast radially, but slow inward/outward
+- Shield (wide and flattish/roundish)
+  - Mouse holds the handle, rotates around egg
+  - Moves slow radially, but fast inward/outward
+- Mace (ball + chain + stick)
+  - Mouse holds the stick, swings ball around
+
+Each hero could have 2 sides, red and blue:
+- Hit red enemies with red (baddies)
+- Hit blue enemies with blue (food? powerups?)
 
 Iterate!
 
