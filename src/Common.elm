@@ -1,5 +1,6 @@
 module Common exposing (..)
 
+import Game.TwoD.Camera as Camera exposing (Camera)
 import Mouse
 import Time exposing (Time)
 
@@ -48,3 +49,19 @@ type alias Enemy =
 type Msg
     = MouseMove Mouse.Position
     | Tick Time
+
+
+
+-- Game 2d stuff
+
+
+camera =
+    Camera.fixedHeight (16 * 9) ( 0, 0 )
+
+
+cameraWidth =
+    800
+
+
+cameraHeight =
+    450

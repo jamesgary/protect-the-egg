@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import AnimationFrame
 import Common exposing (..)
+import Game.TwoD.Camera exposing (viewportToGameCoordinates)
 import Html
 import Mouse
 import Time exposing (Time)
@@ -22,7 +23,7 @@ main =
 
 
 enemySpeed =
-    0.05
+    0.02
 
 
 init : Flag -> ( Model, Cmd Msg )
@@ -31,24 +32,21 @@ init { windowWidth, windowHeight } =
       , windowHeight = windowHeight
       , egg =
             { pos =
-                { x = toFloat windowWidth / 2
-                , y = toFloat windowHeight / 2
+                { x = 0
+                , y = 0
                 }
-            , rad = 50
+            , rad = 10
             }
       , hero =
             { pos = { x = 300, y = 100 }
-            , rad = 25
+            , rad = 7
             , angle = 0
             }
       , enemies =
-            [ { pos = { x = 30, y = 30 }, rad = 10 }
-            , { pos = { x = 30, y = 130 }, rad = 10 }
-            , { pos = { x = 130, y = 30 }, rad = 10 }
-            , { pos = { x = 230, y = 30 }, rad = 10 }
-            , { pos = { x = 30, y = 230 }, rad = 10 }
-            , { pos = { x = 330, y = 30 }, rad = 10 }
-            , { pos = { x = 30, y = 330 }, rad = 10 }
+            [ { pos = { x = 50, y = 50 }, rad = 2 }
+            , { pos = { x = 50, y = -50 }, rad = 2 }
+            , { pos = { x = -50, y = 50 }, rad = 2 }
+            , { pos = { x = -50, y = -50 }, rad = 2 }
             ]
       , isGameOver = False
       }
@@ -61,10 +59,18 @@ init { windowWidth, windowHeight } =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg ({ windowWidth, windowHeight } as model) =
     case msg of
         MouseMove { x, y } ->
-            moveHero (Pos (toFloat x) (toFloat y)) model.egg.pos model ! []
+            viewportToGameCoordinates
+                camera
+                ( cameraWidth, cameraHeight )
+                ( round <| toFloat x - 0.5 * (toFloat windowWidth - cameraWidth)
+                , round <| toFloat y - 0.5 * (toFloat windowHeight - cameraHeight)
+                )
+                |> (\( gameX, gameY ) ->
+                        moveHero (Pos gameX gameY) model.egg.pos model ! []
+                   )
 
         Tick timeDelta ->
             tick timeDelta model ! []
@@ -137,8 +143,11 @@ moveEnemyCloserToEgg timeDelta egg enemy =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions ({ isGameOver } as model) =
     Sub.batch
         [ Mouse.moves MouseMove
-        , AnimationFrame.diffs Tick
+        , if isGameOver then
+            Sub.none
+          else
+            AnimationFrame.diffs Tick
         ]

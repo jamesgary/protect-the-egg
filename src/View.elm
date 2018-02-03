@@ -1,87 +1,64 @@
 module View exposing (view)
 
+import Color exposing (Color)
 import Common exposing (..)
+import Game.TwoD as Game
+import Game.TwoD.Camera as Camera exposing (Camera)
+import Game.TwoD.Render as Render exposing (Renderable, circle, rectangle)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class, style)
+
+
+eggBorder =
+    0.8
 
 
 view : Model -> Html Msg
 view ({ egg, hero, enemies, isGameOver } as model) =
     div [ class "container" ]
-        ([ viewGameOver isGameOver
-         , viewEgg egg
-         , viewHero hero
-         ]
-            ++ List.map viewEnemy enemies
-        )
+        [ Game.renderCentered
+            { time = 0
+            , camera = camera
+            , size = ( cameraWidth, cameraHeight )
+            }
+            (List.concat
+                [ viewEgg egg
+                , viewHero hero
+                , List.concat (List.map viewEnemy enemies)
+                ]
+            )
+        , viewGameOver isGameOver
+        ]
 
 
-viewEgg : Egg -> Html Msg
+viewEgg : Egg -> List Renderable
 viewEgg { pos, rad } =
-    div
-        [ class "egg sprite"
-        , style
-            [ ( "transform"
-              , "translate("
-                    ++ px pos.x
-                    ++ ","
-                    ++ px pos.y
-                    ++ ")"
-              )
-            , ( "width", px (2 * rad) )
-            , ( "height", px (2 * rad) )
-            , ( "top", px (-1 * rad) )
-            , ( "left", px (-1 * rad) )
-            ]
-        ]
-        []
+    [ viewCircle Color.black pos (rad + eggBorder)
+    , viewCircle Color.white pos rad
+    ]
 
 
-viewHero : Hero -> Html Msg
+viewCircle : Color -> Pos -> Float -> Renderable
+viewCircle color pos rad =
+    Render.shape circle
+        { color = color
+        , position = ( pos.x - rad, pos.y - rad )
+        , size = ( rad * 2, rad * 2 )
+        }
+
+
+viewHero : Hero -> List Renderable
 viewHero { pos, rad, angle } =
-    div
-        [ class "hero sprite"
-        , style
-            [ ( "transform"
-              , "translate("
-                    ++ px pos.x
-                    ++ ","
-                    ++ px pos.y
-                    ++ ")"
-                    ++ " rotate("
-                    ++ toString angle
-                    ++ "rad)"
-              )
-            , ( "width", px (2 * rad) )
-            , ( "height", px rad )
-            , ( "top", px (-0.5 * rad) )
-            , ( "left", px (-1 * rad) )
-            , ( "border-bottom-left-radius", px (2 * rad) )
-            , ( "border-bottom-right-radius", px (2 * rad) )
-            ]
-        ]
-        []
+    [ viewCircle Color.black pos (rad + eggBorder)
+    , viewCircle Color.purple pos rad
+    ]
 
 
-viewEnemy : Enemy -> Html Msg
+viewEnemy : Enemy -> List Renderable
 viewEnemy { pos, rad } =
-    div
-        [ class "enemy sprite"
-        , style
-            [ ( "transform"
-              , "translate("
-                    ++ px pos.x
-                    ++ ","
-                    ++ px pos.y
-                    ++ ")"
-              )
-            , ( "width", px (2 * rad) )
-            , ( "height", px (2 * rad) )
-            , ( "top", px (-1 * rad) )
-            , ( "left", px (-1 * rad) )
-            ]
-        ]
-        []
+    [ viewCircle Color.black pos (rad + eggBorder)
+    , viewCircle Color.red pos rad
+    ]
 
 
 viewGameOver : Bool -> Html Msg
