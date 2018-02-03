@@ -14,6 +14,8 @@ type alias Model =
     , enemies : List Enemy
     , isGameOver : Bool
     , seed : Random.Seed
+    , timeSinceLastSpawn : Time
+    , curTime : Time
     }
 
 

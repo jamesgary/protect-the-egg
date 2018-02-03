@@ -53,6 +53,8 @@ init { windowWidth, windowHeight, timestamp } =
       , enemies = enemies
       , isGameOver = False
       , seed = newSeed
+      , timeSinceLastSpawn = 0
+      , curTime = 0
       }
     , Cmd.none
     )
@@ -64,7 +66,7 @@ initEnemies seed =
 
 
 enemyStartingDistFromEgg =
-    100
+    150
 
 
 enemyGenerator : Random.Generator Enemy
@@ -99,8 +101,8 @@ update msg ({ windowWidth, windowHeight } as model) =
                         moveHero (Pos gameX gameY) model.egg.pos model ! []
                    )
 
-        Tick timeDelta ->
-            tick timeDelta model ! []
+        Tick curTime ->
+            tick curTime model ! []
 
 
 moveHero : Pos -> Pos -> Model -> Model
@@ -116,11 +118,41 @@ moveHero mousePos eggPos ({ hero } as model) =
     }
 
 
+initTimeToSpawn =
+    500
+
+
 tick : Time -> Model -> Model
-tick timeDelta ({ egg, enemies, hero } as model) =
+tick timeDelta ({ egg, enemies, hero, timeSinceLastSpawn, seed } as model) =
     let
+        curTime =
+            model.curTime + timeDelta
+
+        timeToSpawn =
+            -- TODO get faster and faster
+            initTimeToSpawn
+
+        numEnemiesToSpawnFloat =
+            (curTime - timeSinceLastSpawn) / timeToSpawn
+
+        numEnemiesToSpawnInt =
+            floor numEnemiesToSpawnFloat
+
+        timePassedSinceLastSpawn =
+            (numEnemiesToSpawnFloat - toFloat numEnemiesToSpawnInt) * timeToSpawn
+
+        ( ( spawnedEnemies, newSeed ), newTimeSinceLastSpawn ) =
+            if numEnemiesToSpawnInt >= 1 then
+                ( Random.step (Random.list numEnemiesToSpawnInt enemyGenerator) seed
+                , curTime - timePassedSinceLastSpawn
+                )
+            else
+                ( ( [], seed ), timeSinceLastSpawn )
+
         movedEnemies =
-            List.map (moveEnemyCloserToEgg timeDelta egg) enemies
+            enemies
+                |> List.append spawnedEnemies
+                |> List.map (moveEnemyCloserToEgg timeDelta egg)
                 |> List.filterMap (doesCollideWithHero hero)
 
         isGameOver =
@@ -129,6 +161,9 @@ tick timeDelta ({ egg, enemies, hero } as model) =
     { model
         | enemies = movedEnemies
         , isGameOver = isGameOver
+        , curTime = curTime
+        , timeSinceLastSpawn = newTimeSinceLastSpawn
+        , seed = newSeed
     }
 
 

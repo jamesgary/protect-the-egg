@@ -16,9 +16,10 @@ Day 1
 Day 3
 - [x] Use webgl
 - [x] Random enemy position upon start up
+- [x] Trickle of enemies (every X ms, an enemy spawns randomly around egg)
 
 Next steps:
-- [ ] Trickle of enemies (every X ms, an enemy spawns randomly around egg)
+- [ ] Have enemy spawn rate get faster and faster, output spawnrate
 - [ ] Use the sword as a sword
 - [ ] Hero slowly moves towards cursor (doesn't snap)
 - [ ] Fix collision with new semi-circle hero
