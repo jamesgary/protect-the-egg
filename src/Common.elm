@@ -40,8 +40,9 @@ type alias Pos =
 
 type alias Hero =
     { pos : Pos
-    , rad : Float
     , angle : Float
+    , width : Float
+    , height : Float
     }
 
 

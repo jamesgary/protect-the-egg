@@ -47,10 +47,39 @@ viewCircle color pos rad =
         }
 
 
+heroBorder =
+    0.5
+
+
 viewHero : Hero -> List Renderable
-viewHero { pos, rad, angle } =
-    [ viewCircle Color.black pos (rad + eggBorder)
-    , viewCircle Color.purple pos rad
+viewHero { pos, width, height, angle } =
+    let
+        ( x, y ) =
+            -- hold the sword/shield from the bottom middle
+            fromPolar ( height, angle )
+                |> (\( offsetX, offsetY ) ->
+                        ( pos.x - 0.5 * offsetY
+                        , pos.y + 0.5 * offsetX
+                        )
+                   )
+    in
+    [ Render.shapeWithOptions rectangle
+        { color = Color.black
+        , position = ( x, y, 0 )
+        , size =
+            ( width + (heroBorder * 2)
+            , height + (heroBorder * 2)
+            )
+        , rotation = angle
+        , pivot = ( 0.5, 0.5 )
+        }
+    , Render.shapeWithOptions rectangle
+        { color = Color.rgb 255 55 186
+        , position = ( x, y, 0 )
+        , size = ( width, height )
+        , rotation = angle
+        , pivot = ( 0.5, 0.5 )
+        }
     ]
 
 

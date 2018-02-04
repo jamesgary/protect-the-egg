@@ -47,7 +47,8 @@ init { windowWidth, windowHeight, timestamp } =
             }
       , hero =
             { pos = { x = 300, y = 100 }
-            , rad = 7
+            , width = 10
+            , height = 3
             , angle = 0
             }
       , enemies = enemies
@@ -182,7 +183,9 @@ doesCollideWithHero hero enemy =
         dist_ =
             dist hero.pos enemy.pos
     in
-    if dist_ < (hero.rad + enemy.rad) then
+    --if dist_ < (hero.rad + enemy.rad) then
+    -- FIXME
+    if True then
         Nothing
     else
         Just enemy

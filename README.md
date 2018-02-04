@@ -18,9 +18,13 @@ Day 3
 - [x] Random enemy position upon start up
 - [x] Trickle of enemies (every X ms, an enemy spawns randomly around egg)
 
+Day 4
+- [x] Hero is a rectangle
+- [ ] Click to change between sword/shield
+- [ ] Restore hero/enemy collision logic
+
 Next steps:
 - [ ] Have enemy spawn rate get faster and faster, output spawnrate
-- [ ] Use the sword as a sword
 - [ ] Hero slowly moves towards cursor (doesn't snap)
 - [ ] Fix collision with new semi-circle hero
 
@@ -30,6 +34,8 @@ Future steps:
 - [ ] Onboarding/Tutorial
 - [ ] Sound
 - [ ] Music
+- [ ] Benchmark
+- [ ] Quadtrees
 - [ ] Save progress
 
 Possible heroes archetypes:
