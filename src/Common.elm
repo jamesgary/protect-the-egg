@@ -118,6 +118,31 @@ dist pos1 pos2 =
     sqrt ((pos1.x - pos2.x) ^ 2 + (pos1.y - pos2.y) ^ 2)
 
 
+getHeroSweepQuadPoints : Hero -> ( Pos, Pos, Pos, Pos )
+getHeroSweepQuadPoints { pos, lastPos, length, angle, lastAngle } =
+    let
+        ( rotOffsetX, rotOffsetY ) =
+            fromPolar ( length / 2, angle )
+
+        ( rotOffsetXLast, rotOffsetYLast ) =
+            fromPolar ( length / 2, lastAngle )
+
+        -- assuming width is longer than height...
+        a =
+            Pos (pos.x - rotOffsetX) (pos.y - rotOffsetY)
+
+        b =
+            Pos (pos.x + rotOffsetX) (pos.y + rotOffsetY)
+
+        c =
+            Pos (lastPos.x + rotOffsetXLast) (lastPos.y + rotOffsetYLast)
+
+        d =
+            Pos (lastPos.x - rotOffsetXLast) (lastPos.y - rotOffsetYLast)
+    in
+    ( a, b, c, d )
+
+
 
 -- Game 2d stuff
 

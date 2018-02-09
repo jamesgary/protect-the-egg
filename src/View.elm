@@ -52,46 +52,44 @@ heroBorder =
 
 
 viewHero : Hero -> List Renderable
-viewHero { state, pos, lastPos, angle, lastAngle, length, thickness } =
-    --let
-    --    --( x, y ) =
-    --    --    -- hold the sword/shield from the bottom middle
-    --    --    fromPolar ( height, angle )
-    --    --        |> (\( offsetX, offsetY ) ->
-    --    --                ( pos.x - 0.5 * offsetY
-    --    --                , pos.y + 0.5 * offsetX
-    --    --                )
-    --    --           )
-    --    { cur, last } =
-    --        heroShapes hero
-    --in
+viewHero ({ state, pos, lastPos, angle, lastAngle, length, thickness } as hero) =
     let
-        -- consider hero to be wider than taller
         ( rotOffsetX, rotOffsetY ) =
             fromPolar ( length / 2, angle )
 
         ( rotOffsetXLast, rotOffsetYLast ) =
             fromPolar ( length / 2, lastAngle )
+
+        ( a, b, c, d ) =
+            getHeroSweepQuadPoints hero
     in
-    List.map
-        (viewShape heroColor)
-        [ Rect
-            { pos = pos
-            , width = length
-            , height = thickness
-            , angle = angle
-            }
-        , Circle { pos = { x = pos.x + rotOffsetX, y = pos.y + rotOffsetY }, rad = thickness / 2 }
-        , Circle { pos = { x = pos.x - rotOffsetX, y = pos.y - rotOffsetY }, rad = thickness / 2 }
+    List.concat
+        [ List.map
+            (viewShape heroColor)
+            [ Rect
+                { pos = pos
+                , width = length
+                , height = thickness
+                , angle = angle
+                }
+            , Circle { pos = { x = pos.x + rotOffsetX, y = pos.y + rotOffsetY }, rad = thickness / 2 }
+            , Circle { pos = { x = pos.x - rotOffsetX, y = pos.y - rotOffsetY }, rad = thickness / 2 }
+            ]
+        , [] --[ viewShape (Color.rgb 255 200 200) (Circle { pos = a, rad = 2 })
+
+        --, viewShape (Color.rgb 255 100 100) (Circle { pos = b, rad = 2 })
+        --, viewShape (Color.rgb 0 255 255) (Circle { pos = c, rad = 2 })
+        --, viewShape (Color.rgb 0 0 255) (Circle { pos = d, rad = 2 })
+        --]
         ]
 
 
 heroColor =
-    Color.rgb 255 55 186
+    Color.rgb 20 130 80
 
 
 blurColor =
-    Color.rgb 255 195 246
+    Color.rgb 255 255 255
 
 
 
