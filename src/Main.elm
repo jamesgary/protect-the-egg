@@ -227,7 +227,7 @@ doesCollideWithEgg egg enemy =
 
 doesCollideWithHero : Hero -> Enemy -> Maybe Enemy
 doesCollideWithHero hero enemy =
-    if isTouchingCatcher hero enemy then
+    if isTouchingHero hero enemy then
         Nothing
     else
         Just enemy
@@ -288,65 +288,24 @@ subscriptions ({ isGameOver } as model) =
 -- then add "paddle radius"?
 
 
-type alias Line =
-    ( Vec2, Vec2 )
-
-
-isTouchingCatcher : Hero -> Enemy -> Bool
-isTouchingCatcher hero enemy =
+isTouchingHero : Hero -> Enemy -> Bool
+isTouchingHero hero enemy =
+    -- check if distance between
     let
         ( a, b, c, d ) =
             getHeroSweepQuadPoints hero
 
-        catcherLines =
-            [ ( a, b )
-            , ( b, c )
-            , ( c, d )
-            , ( d, a )
-            ]
+        ( e, f ) =
+            ( enemy.pos, enemy.lastPos )
+
+        minDist =
+            List.minimum
+                [ Math.getDistBetweenLines ( a, b ) ( e, f )
+                , Math.getDistBetweenLines ( b, c ) ( e, f )
+                , Math.getDistBetweenLines ( c, d ) ( e, f )
+                , Math.getDistBetweenLines ( d, a ) ( e, f )
+                ]
+                |> Maybe.withDefault -42
     in
-    doesLineIntersectLines ( enemy.pos, enemy.lastPos ) catcherLines
-        || (List.length (List.filter (doLinesIntersect ( enemy.pos, V2.fromTuple ( -1000, -1000 ) )) catcherLines) % 2 == 1)
-
-
-doesLineIntersectLines : Line -> List Line -> Bool
-doesLineIntersectLines line lines =
-    List.any (doLinesIntersect line) lines
-
-
-doLinesIntersect : Line -> Line -> Bool
-doLinesIntersect line1 line2 =
-    -- https://stackoverflow.com/a/24392281
-    let
-        ( line1A, line1B ) =
-            line1
-
-        ( line2A, line2B ) =
-            line2
-
-        ( a, b ) =
-            V2.toTuple line1A
-
-        ( c, d ) =
-            V2.toTuple line1B
-
-        ( p, q ) =
-            V2.toTuple line2A
-
-        ( r, s ) =
-            V2.toTuple line2B
-
-        det =
-            (c - a) * (s - q) - (r - p) * (d - b)
-    in
-    if det == 0 then
-        False
-    else
-        let
-            lambda =
-                ((s - q) * (r - a) + (p - r) * (s - b)) / det
-
-            gamma =
-                ((b - d) * (r - a) + (c - a) * (s - b)) / det
-        in
-        (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1)
+    (minDist <= (hero.thickness / 2) + enemy.rad)
+        || (List.length (List.filter (Math.doLinesIntersect ( enemy.pos, V2.fromTuple ( -1000, -1000 ) )) [ ( a, b ), ( b, c ), ( c, d ), ( d, a ) ]) % 2 == 1)

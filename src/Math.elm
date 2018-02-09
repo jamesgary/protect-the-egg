@@ -30,9 +30,21 @@ getDistBetweenLineAndPoint ( a, b ) c =
 
         ( x0, y0 ) =
             V2.toTuple c
+
+        lengthSq =
+            V2.distanceSquared a b
     in
-    abs (((y2 - y1) * x0) - ((x2 - x1) * y0) + (x2 * y1) - (y2 * x1))
-        / sqrt (((y2 - y1) ^ 2) + ((x2 - x1) ^ 2))
+    if lengthSq == 0 then
+        V2.distance c a
+    else
+        let
+            t =
+                max 0 (min 1 (V2.dot (V2.sub c a) (V2.sub b a) / lengthSq))
+
+            projection =
+                V2.add a (V2.scale t (V2.sub b a))
+        in
+        V2.distance c projection
 
 
 dist : Vec2 -> Vec2 -> Float
@@ -45,3 +57,54 @@ dist pos1 pos2 =
             V2.toTuple pos2
     in
     sqrt ((x1 - x2) ^ 2 + (y1 - y2) ^ 2)
+
+
+
+-- MAY NOT NEED?
+
+
+type alias Line =
+    ( Vec2, Vec2 )
+
+
+doesLineIntersectLines : Line -> List Line -> Bool
+doesLineIntersectLines line lines =
+    List.any (doLinesIntersect line) lines
+
+
+doLinesIntersect : Line -> Line -> Bool
+doLinesIntersect line1 line2 =
+    -- https://stackoverflow.com/a/24392281
+    let
+        ( line1A, line1B ) =
+            line1
+
+        ( line2A, line2B ) =
+            line2
+
+        ( a, b ) =
+            V2.toTuple line1A
+
+        ( c, d ) =
+            V2.toTuple line1B
+
+        ( p, q ) =
+            V2.toTuple line2A
+
+        ( r, s ) =
+            V2.toTuple line2B
+
+        det =
+            (c - a) * (s - q) - (r - p) * (d - b)
+    in
+    if det == 0 then
+        False
+    else
+        let
+            lambda =
+                ((s - q) * (r - a) + (p - r) * (s - b)) / det
+
+            gamma =
+                ((b - d) * (r - a) + (c - a) * (s - b)) / det
+        in
+        (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1)
