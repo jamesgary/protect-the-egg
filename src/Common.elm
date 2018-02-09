@@ -44,7 +44,7 @@ type alias Hero =
     , lastPos : Pos
     , angle : Float
     , lastAngle : Float
-    , length : Float
+    , length : Float -- length represents the inner rect, not the circle bumpers
     , thickness : Float
     }
 
@@ -72,44 +72,45 @@ type Msg
     | Tick Time
 
 
-heroShapes : Hero -> { cur : List Shape, last : List Shape }
-heroShapes ({ pos, lastPos, width, height, angle, lastAngle } as hero) =
-    let
-        -- consider hero to be wider than taller
-        ( width, height ) =
-            if hero.width > hero.height then
-                ( hero.width, hero.height )
-            else
-                ( hero.height, hero.width )
 
-        ( rotOffsetX, rotOffsetY ) =
-            fromPolar ( width / 2, angle )
-
-        ( rotOffsetXLast, rotOffsetYLast ) =
-            fromPolar ( width / 2, lastAngle )
-    in
-    { cur =
-        [ Circle { pos = { x = pos.x + rotOffsetX, y = pos.y + rotOffsetY }, rad = height / 2 }
-        , Circle { pos = { x = pos.x - rotOffsetX, y = pos.y - rotOffsetY }, rad = height / 2 }
-        , Rect { pos = hero.pos, width = width, height = height, angle = angle }
-        ]
-    , last =
-        [ Circle { pos = { x = lastPos.x + rotOffsetXLast, y = lastPos.y + rotOffsetYLast }, rad = height / 2 }
-        , Circle { pos = { x = lastPos.x - rotOffsetXLast, y = lastPos.y - rotOffsetYLast }, rad = height / 2 }
-        , Rect { pos = hero.lastPos, width = width, height = height, angle = lastAngle }
-        , let
-            x =
-                (pos.x + lastPos.x) / 2
-
-            y =
-                (pos.y + lastPos.y) / 2
-
-            a =
-                (angle + lastAngle) / 2
-          in
-          Rect { pos = { x = x, y = y }, width = width + height, height = dist pos lastPos, angle = a }
-        ]
-    }
+--heroShapes : Hero -> { cur : List Shape, last : List Shape }
+--heroShapes ({ pos, lastPos, width, height, angle, lastAngle } as hero) =
+--    let
+--        -- consider hero to be wider than taller
+--        ( width, height ) =
+--            if hero.width > hero.height then
+--                ( hero.width, hero.height )
+--            else
+--                ( hero.height, hero.width )
+--
+--        ( rotOffsetX, rotOffsetY ) =
+--            fromPolar ( width / 2, angle )
+--
+--        ( rotOffsetXLast, rotOffsetYLast ) =
+--            fromPolar ( width / 2, lastAngle )
+--    in
+--    { cur =
+--        [ Circle { pos = { x = pos.x + rotOffsetX, y = pos.y + rotOffsetY }, rad = height / 2 }
+--        , Circle { pos = { x = pos.x - rotOffsetX, y = pos.y - rotOffsetY }, rad = height / 2 }
+--        , Rect { pos = hero.pos, width = width, height = height, angle = angle }
+--        ]
+--    , last =
+--        [ Circle { pos = { x = lastPos.x + rotOffsetXLast, y = lastPos.y + rotOffsetYLast }, rad = height / 2 }
+--        , Circle { pos = { x = lastPos.x - rotOffsetXLast, y = lastPos.y - rotOffsetYLast }, rad = height / 2 }
+--        , Rect { pos = hero.lastPos, width = width, height = height, angle = lastAngle }
+--        , let
+--            x =
+--                (pos.x + lastPos.x) / 2
+--
+--            y =
+--                (pos.y + lastPos.y) / 2
+--
+--            a =
+--                (angle + lastAngle) / 2
+--          in
+--          Rect { pos = { x = x, y = y }, width = width + height, height = dist pos lastPos, angle = a }
+--        ]
+--    }
 
 
 dist : Pos -> Pos -> Float

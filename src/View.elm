@@ -52,23 +52,52 @@ heroBorder =
 
 
 viewHero : Hero -> List Renderable
-viewHero ({ pos, width, height, angle } as hero) =
+viewHero { state, pos, lastPos, angle, lastAngle, length, thickness } =
+    --let
+    --    --( x, y ) =
+    --    --    -- hold the sword/shield from the bottom middle
+    --    --    fromPolar ( height, angle )
+    --    --        |> (\( offsetX, offsetY ) ->
+    --    --                ( pos.x - 0.5 * offsetY
+    --    --                , pos.y + 0.5 * offsetX
+    --    --                )
+    --    --           )
+    --    { cur, last } =
+    --        heroShapes hero
+    --in
     let
-        --( x, y ) =
-        --    -- hold the sword/shield from the bottom middle
-        --    fromPolar ( height, angle )
-        --        |> (\( offsetX, offsetY ) ->
-        --                ( pos.x - 0.5 * offsetY
-        --                , pos.y + 0.5 * offsetX
-        --                )
-        --           )
-        { cur, last } =
-            heroShapes hero
+        -- consider hero to be wider than taller
+        ( rotOffsetX, rotOffsetY ) =
+            fromPolar ( length / 2, angle )
+
+        ( rotOffsetXLast, rotOffsetYLast ) =
+            fromPolar ( length / 2, lastAngle )
     in
-    List.concat
-        [ List.map (viewShape (Color.rgb 255 195 246)) last
-        , List.map (viewShape (Color.rgb 255 55 186)) cur
+    List.map
+        (viewShape heroColor)
+        [ Rect
+            { pos = pos
+            , width = length
+            , height = thickness
+            , angle = angle
+            }
+        , Circle { pos = { x = pos.x + rotOffsetX, y = pos.y + rotOffsetY }, rad = thickness / 2 }
+        , Circle { pos = { x = pos.x - rotOffsetX, y = pos.y - rotOffsetY }, rad = thickness / 2 }
         ]
+
+
+heroColor =
+    Color.rgb 255 55 186
+
+
+blurColor =
+    Color.rgb 255 195 246
+
+
+
+--[ List.map (viewShape (Color.rgb 255 195 246)) last
+--, List.map (viewShape (Color.rgb 255 55 186)) cur
+--]
 
 
 viewShape : Color -> Shape -> Renderable

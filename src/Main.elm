@@ -46,12 +46,13 @@ init { windowWidth, windowHeight, timestamp } =
             , rad = 10
             }
       , hero =
-            { pos = { x = 300, y = 100 }
-            , lastPos = { x = 300, y = 100 }
-            , width = 50
-            , height = 5
+            { state = Shield
+            , pos = { x = 100, y = 50 }
+            , lastPos = { x = 100, y = 50 }
+            , length = 50
             , angle = 0
             , lastAngle = 0
+            , thickness = 5
             }
       , enemies = enemies
       , isGameOver = False
@@ -94,10 +95,10 @@ enemyGenerator =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ windowWidth, windowHeight } as model) =
     case msg of
-        MouseMove { x, y } ->
+        MouseClick { x, y } ->
             model ! []
 
-        MouseClick { x, y } ->
+        MouseMove { x, y } ->
             --{ model | hero = clickHero model.hero } ! []
             -- TODO
             viewportToGameCoordinates
@@ -127,14 +128,6 @@ moveHero mousePos eggPos ({ hero } as model) =
                         |> (\( _, angle ) -> angle + turns 0.25)
                 , lastAngle = hero.angle
             }
-    }
-
-
-clickHero : Hero -> Hero
-clickHero hero =
-    { hero
-        | width = hero.height
-        , height = hero.width
     }
 
 
@@ -200,7 +193,8 @@ doesCollideWithEgg egg enemy =
 
 doesCollideWithHero : Hero -> Enemy -> Maybe Enemy
 doesCollideWithHero hero enemy =
-    if isTouchingCatcher hero enemy then
+    if True then
+        --if isTouchingCatcher hero enemy then
         Nothing
     else
         Just enemy
@@ -253,46 +247,45 @@ subscriptions ({ isGameOver } as model) =
 -- COLLISIONS
 -- tips of pos and lastPos
 -- then add "paddle radius"?
-
-
-getHeroSweepQuadPoints : Hero -> ( Pos, Pos, Pos, Pos )
-getHeroSweepQuadPoints { pos, lastPos, width, height } =
-    let
-        -- assuming width is longer than height...
-        a =
-            Pos (pos.x - width / 2) (pos.y + height / 2)
-
-        b =
-            Pos (pos.x + width / 2) (pos.y + height / 2)
-
-        c =
-            Pos (lastPos.x - width / 2) (lastPos.y + height / 2)
-
-        d =
-            Pos (lastPos.x + width / 2) (lastPos.y + height / 2)
-    in
-    ( a, b, c, d )
+--getHeroSweepQuadPoints : Hero -> ( Pos, Pos, Pos, Pos )
+--getHeroSweepQuadPoints { pos, lastPos, width, height } =
+--    let
+--        -- assuming width is longer than height...
+--        a =
+--            Pos (pos.x - width / 2) (pos.y + height / 2)
+--
+--        b =
+--            Pos (pos.x + width / 2) (pos.y + height / 2)
+--
+--        c =
+--            Pos (lastPos.x - width / 2) (lastPos.y + height / 2)
+--
+--        d =
+--            Pos (lastPos.x + width / 2) (lastPos.y + height / 2)
+--    in
+--    ( a, b, c, d )
 
 
 type alias Line =
     ( Pos, Pos )
 
 
-isTouchingCatcher : Hero -> Enemy -> Bool
-isTouchingCatcher hero enemy =
-    let
-        ( a, b, c, d ) =
-            getHeroSweepQuadPoints hero
 
-        catcherLines =
-            [ ( a, b )
-            , ( b, c )
-            , ( c, d )
-            , ( d, a )
-            ]
-    in
-    doesLineIntersectLines ( enemy.pos, enemy.lastPos ) catcherLines
-        || (List.length (List.filter (doLinesIntersect ( enemy.pos, Pos -1000 -1000 )) catcherLines) % 2 == 1)
+--isTouchingCatcher : Hero -> Enemy -> Bool
+--isTouchingCatcher hero enemy =
+--    let
+--        ( a, b, c, d ) =
+--            getHeroSweepQuadPoints hero
+--
+--        catcherLines =
+--            [ ( a, b )
+--            , ( b, c )
+--            , ( c, d )
+--            , ( d, a )
+--            ]
+--    in
+--    doesLineIntersectLines ( enemy.pos, enemy.lastPos ) catcherLines
+--        || (List.length (List.filter (doLinesIntersect ( enemy.pos, Pos -1000 -1000 )) catcherLines) % 2 == 1)
 
 
 doesLineIntersectLines : Line -> List Line -> Bool
