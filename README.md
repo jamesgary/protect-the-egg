@@ -20,8 +20,8 @@ Day 3
 
 Day 4
 - [x] Hero is a rectangle
-- [ ] Click to change between sword/shield
 - [ ] Restore hero/enemy collision logic
+- [ ] Click to change between sword/shield/swordshield
 
 Next steps:
 - [ ] Have enemy spawn rate get faster and faster, output spawnrate

@@ -52,41 +52,73 @@ heroBorder =
 
 
 viewHero : Hero -> List Renderable
-viewHero { pos, width, height, angle } =
+viewHero ({ pos, width, height, angle } as hero) =
     let
-        ( x, y ) =
-            -- hold the sword/shield from the bottom middle
-            fromPolar ( height, angle )
-                |> (\( offsetX, offsetY ) ->
-                        ( pos.x - 0.5 * offsetY
-                        , pos.y + 0.5 * offsetX
-                        )
-                   )
+        --( x, y ) =
+        --    -- hold the sword/shield from the bottom middle
+        --    fromPolar ( height, angle )
+        --        |> (\( offsetX, offsetY ) ->
+        --                ( pos.x - 0.5 * offsetY
+        --                , pos.y + 0.5 * offsetX
+        --                )
+        --           )
+        { cur, last } =
+            heroShapes hero
     in
-    [ Render.shapeWithOptions rectangle
-        { color = Color.black
-        , position = ( x, y, 0 )
-        , size =
-            ( width + (heroBorder * 2)
-            , height + (heroBorder * 2)
-            )
-        , rotation = angle
-        , pivot = ( 0.5, 0.5 )
-        }
-    , Render.shapeWithOptions rectangle
-        { color = Color.rgb 255 55 186
-        , position = ( x, y, 0 )
-        , size = ( width, height )
-        , rotation = angle
-        , pivot = ( 0.5, 0.5 )
-        }
-    ]
+    List.concat
+        [ List.map (viewShape (Color.rgb 255 195 246)) last
+        , List.map (viewShape (Color.rgb 255 55 186)) cur
+        ]
+
+
+viewShape : Color -> Shape -> Renderable
+viewShape color shape =
+    case shape of
+        Rect { pos, width, height, angle } ->
+            Render.shapeWithOptions rectangle
+                { color = color
+                , position = ( pos.x, pos.y, 0 )
+                , size = ( width, height )
+                , rotation = angle
+                , pivot = ( 0.5, 0.5 )
+                }
+
+        Circle { pos, rad } ->
+            Render.shape circle
+                { color = color
+                , position = ( pos.x - rad, pos.y - rad )
+                , size = ( rad * 2, rad * 2 )
+                }
+
+
+
+--[{- Render.shapeWithOptions rectangle
+--    { color = Color.black
+--    , position = ( x, y, 0 )
+--    , size =
+--        ( width + (heroBorder * 2)
+--        , height + (heroBorder * 2)
+--        )
+--    , rotation = angle
+--    , pivot = ( 0.5, 0.5 )
+--    }
+--    ,
+-- -}
+-- {- Render.shapeWithOptions rectangle
+--    { color = Color.rgb 255 55 186
+--    , position = ( x, y, 0 )
+--    , size = ( width, height )
+--    , rotation = angle
+--    , pivot = ( 0.5, 0.5 )
+--    }
+-- -}
+--]
 
 
 viewEnemy : Enemy -> List Renderable
 viewEnemy { pos, rad } =
-    [ viewCircle Color.black pos (rad + eggBorder)
-    , viewCircle Color.red pos rad
+    [ --viewCircle Color.black pos (rad + eggBorder),
+      viewCircle Color.red pos rad
     ]
 
 
