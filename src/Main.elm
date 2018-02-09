@@ -5,6 +5,7 @@ import Common exposing (..)
 import Game.TwoD.Camera exposing (viewportToGameCoordinates)
 import Html
 import Math
+import Math.Vector2 as V2 exposing (Vec2)
 import Mouse
 import Random
 import Time exposing (Time)
@@ -44,16 +45,13 @@ init { windowWidth, windowHeight, timestamp } =
     ( { windowWidth = windowWidth
       , windowHeight = windowHeight
       , egg =
-            { pos =
-                { x = 0
-                , y = 0
-                }
+            { pos = V2.fromTuple ( 0, 0 )
             , rad = 10
             }
       , hero =
             { state = Shield
-            , pos = { x = 100, y = 50 }
-            , lastPos = { x = 100, y = 50 }
+            , pos = V2.fromTuple ( 100, 50 )
+            , lastPos = V2.fromTuple ( 100, 50 )
             , length = 50
             , angle = 0
             , lastAngle = 0
@@ -84,8 +82,8 @@ initEnemies seed =
                 List.range (round (cameraHeight / frac) // -spacing) (round (cameraHeight / frac) // spacing)
                     |> List.map
                         (\h ->
-                            { pos = { x = toFloat w * spacing, y = toFloat h * spacing }
-                            , lastPos = { x = toFloat w * spacing, y = toFloat h * spacing }
+                            { pos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
+                            , lastPos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
                             , rad = 2
                             }
                         )
@@ -109,8 +107,8 @@ enemyGenerator =
             (\angle ->
                 fromPolar ( enemyStartingDistFromEgg, angle )
                     |> (\( x, y ) ->
-                            { pos = { x = x, y = y }
-                            , lastPos = { x = x, y = y }
+                            { pos = V2.fromTuple ( x, y )
+                            , lastPos = V2.fromTuple ( x, y )
                             , rad = 2
                             }
                        )
@@ -137,7 +135,7 @@ update msg ({ windowWidth, windowHeight } as model) =
                 , round <| toFloat y - 0.5 * (toFloat windowHeight - cameraHeight)
                 )
                 |> (\( gameX, gameY ) ->
-                        moveHero (Pos gameX gameY) model.egg.pos model ! []
+                        moveHero (V2.fromTuple ( gameX, gameY )) model.egg.pos model ! []
                    )
 
         Tick timeDelta ->
@@ -145,15 +143,22 @@ update msg ({ windowWidth, windowHeight } as model) =
             tick (min timeDelta 33) model ! []
 
 
-moveHero : Pos -> Pos -> Model -> Model
+moveHero : Vec2 -> Vec2 -> Model -> Model
 moveHero mousePos eggPos ({ hero } as model) =
+    let
+        ( eggX, eggY ) =
+            V2.toTuple eggPos
+
+        ( mouseX, mouseY ) =
+            V2.toTuple mousePos
+    in
     { model
         | hero =
             { hero
                 | pos = mousePos
                 , lastPos = hero.pos
                 , angle =
-                    toPolar ( eggPos.x - mousePos.x, eggPos.y - mousePos.y )
+                    toPolar ( eggX - mouseX, eggY - mouseY )
                         |> (\( _, angle ) -> angle + turns 0.25)
                 , lastAngle = hero.angle
             }
@@ -215,7 +220,7 @@ doesCollideWithEgg : Egg -> Enemy -> Bool
 doesCollideWithEgg egg enemy =
     let
         dist_ =
-            dist egg.pos enemy.pos
+            Math.dist egg.pos enemy.pos
     in
     dist_ < (egg.rad + enemy.rad)
 
@@ -241,11 +246,18 @@ doesCollideWithHero hero enemy =
 
 moveEnemyCloserToEgg : Time -> Egg -> Enemy -> Enemy
 moveEnemyCloserToEgg timeDelta egg enemy =
-    toPolar ( egg.pos.x - enemy.pos.x, egg.pos.y - enemy.pos.y )
+    let
+        ( eggX, eggY ) =
+            V2.toTuple egg.pos
+
+        ( enemyX, enemyY ) =
+            V2.toTuple enemy.pos
+    in
+    toPolar ( eggX - enemyX, eggY - enemyY )
         |> (\( _, angle ) -> fromPolar ( timeDelta * enemySpeed, angle ))
         |> (\( x, y ) ->
                 { enemy
-                    | pos = { x = enemy.pos.x + x, y = enemy.pos.y + y }
+                    | pos = V2.fromTuple ( enemyX + x, enemyY + y )
                     , lastPos = enemy.pos
                 }
            )
@@ -277,7 +289,7 @@ subscriptions ({ isGameOver } as model) =
 
 
 type alias Line =
-    ( Pos, Pos )
+    ( Vec2, Vec2 )
 
 
 isTouchingCatcher : Hero -> Enemy -> Bool
@@ -294,7 +306,7 @@ isTouchingCatcher hero enemy =
             ]
     in
     doesLineIntersectLines ( enemy.pos, enemy.lastPos ) catcherLines
-        || (List.length (List.filter (doLinesIntersect ( enemy.pos, Pos -1000 -1000 )) catcherLines) % 2 == 1)
+        || (List.length (List.filter (doLinesIntersect ( enemy.pos, V2.fromTuple ( -1000, -1000 ) )) catcherLines) % 2 == 1)
 
 
 doesLineIntersectLines : Line -> List Line -> Bool
@@ -312,29 +324,17 @@ doLinesIntersect line1 line2 =
         ( line2A, line2B ) =
             line2
 
-        a =
-            line1A.x
+        ( a, b ) =
+            V2.toTuple line1A
 
-        b =
-            line1A.y
+        ( c, d ) =
+            V2.toTuple line1B
 
-        c =
-            line1B.x
+        ( p, q ) =
+            V2.toTuple line2A
 
-        d =
-            line1B.y
-
-        p =
-            line2A.x
-
-        q =
-            line2A.y
-
-        r =
-            line2B.x
-
-        s =
-            line2B.y
+        ( r, s ) =
+            V2.toTuple line2B
 
         det =
             (c - a) * (s - q) - (r - p) * (d - b)

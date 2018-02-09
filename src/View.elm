@@ -7,6 +7,7 @@ import Game.TwoD.Camera as Camera exposing (Camera)
 import Game.TwoD.Render as Render exposing (Renderable, circle, rectangle)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class, style)
+import Math.Vector2 as V2 exposing (Vec2)
 
 
 eggBorder =
@@ -38,11 +39,15 @@ viewEgg { pos, rad } =
     ]
 
 
-viewCircle : Color -> Pos -> Float -> Renderable
+viewCircle : Color -> Vec2 -> Float -> Renderable
 viewCircle color pos rad =
+    let
+        ( x, y ) =
+            V2.toTuple pos
+    in
     Render.shape circle
         { color = color
-        , position = ( pos.x - rad, pos.y - rad )
+        , position = ( x - rad, y - rad )
         , size = ( rad * 2, rad * 2 )
         }
 
@@ -62,6 +67,9 @@ viewHero ({ state, pos, lastPos, angle, lastAngle, length, thickness } as hero) 
 
         ( a, b, c, d ) =
             getHeroSweepQuadPoints hero
+
+        ( x, y ) =
+            V2.toTuple pos
     in
     List.concat
         [ List.map
@@ -72,8 +80,8 @@ viewHero ({ state, pos, lastPos, angle, lastAngle, length, thickness } as hero) 
                 , height = thickness
                 , angle = angle
                 }
-            , Circle { pos = { x = pos.x + rotOffsetX, y = pos.y + rotOffsetY }, rad = thickness / 2 }
-            , Circle { pos = { x = pos.x - rotOffsetX, y = pos.y - rotOffsetY }, rad = thickness / 2 }
+            , Circle { pos = V2.fromTuple ( x + rotOffsetX, y + rotOffsetY ), rad = thickness / 2 }
+            , Circle { pos = V2.fromTuple ( x - rotOffsetX, y - rotOffsetY ), rad = thickness / 2 }
             ]
         , [] --[ viewShape (Color.rgb 255 200 200) (Circle { pos = a, rad = 2 })
 
@@ -104,7 +112,7 @@ viewShape color shape =
         Rect { pos, width, height, angle } ->
             Render.shapeWithOptions rectangle
                 { color = color
-                , position = ( pos.x, pos.y, 0 )
+                , position = ( V2.getX pos, V2.getY pos, 0 )
                 , size = ( width, height )
                 , rotation = angle
                 , pivot = ( 0.5, 0.5 )
@@ -113,7 +121,7 @@ viewShape color shape =
         Circle { pos, rad } ->
             Render.shape circle
                 { color = color
-                , position = ( pos.x - rad, pos.y - rad )
+                , position = ( V2.getX pos - rad, V2.getY pos - rad )
                 , size = ( rad * 2, rad * 2 )
                 }
 

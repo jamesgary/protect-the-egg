@@ -1,6 +1,7 @@
 module Common exposing (..)
 
 import Game.TwoD.Camera as Camera exposing (Camera)
+import Math.Vector2 as V2 exposing (Vec2)
 import Mouse
 import Random
 import Time exposing (Time)
@@ -27,21 +28,15 @@ type alias Flag =
 
 
 type alias Egg =
-    { pos : Pos
+    { pos : Vec2
     , rad : Float
-    }
-
-
-type alias Pos =
-    { x : Float
-    , y : Float
     }
 
 
 type alias Hero =
     { state : HeroState
-    , pos : Pos
-    , lastPos : Pos
+    , pos : Vec2
+    , lastPos : Vec2
     , angle : Float
     , lastAngle : Float
     , length : Float -- length represents the inner rect, not the circle bumpers
@@ -55,15 +50,15 @@ type HeroState
 
 
 type alias Enemy =
-    { pos : Pos
-    , lastPos : Pos
+    { pos : Vec2
+    , lastPos : Vec2
     , rad : Float
     }
 
 
 type Shape
-    = Circle { pos : Pos, rad : Float }
-    | Rect { pos : Pos, width : Float, height : Float, angle : Float }
+    = Circle { pos : Vec2, rad : Float }
+    | Rect { pos : Vec2, width : Float, height : Float, angle : Float }
 
 
 type Msg
@@ -72,53 +67,7 @@ type Msg
     | Tick Time
 
 
-
---heroShapes : Hero -> { cur : List Shape, last : List Shape }
---heroShapes ({ pos, lastPos, width, height, angle, lastAngle } as hero) =
---    let
---        -- consider hero to be wider than taller
---        ( width, height ) =
---            if hero.width > hero.height then
---                ( hero.width, hero.height )
---            else
---                ( hero.height, hero.width )
---
---        ( rotOffsetX, rotOffsetY ) =
---            fromPolar ( width / 2, angle )
---
---        ( rotOffsetXLast, rotOffsetYLast ) =
---            fromPolar ( width / 2, lastAngle )
---    in
---    { cur =
---        [ Circle { pos = { x = pos.x + rotOffsetX, y = pos.y + rotOffsetY }, rad = height / 2 }
---        , Circle { pos = { x = pos.x - rotOffsetX, y = pos.y - rotOffsetY }, rad = height / 2 }
---        , Rect { pos = hero.pos, width = width, height = height, angle = angle }
---        ]
---    , last =
---        [ Circle { pos = { x = lastPos.x + rotOffsetXLast, y = lastPos.y + rotOffsetYLast }, rad = height / 2 }
---        , Circle { pos = { x = lastPos.x - rotOffsetXLast, y = lastPos.y - rotOffsetYLast }, rad = height / 2 }
---        , Rect { pos = hero.lastPos, width = width, height = height, angle = lastAngle }
---        , let
---            x =
---                (pos.x + lastPos.x) / 2
---
---            y =
---                (pos.y + lastPos.y) / 2
---
---            a =
---                (angle + lastAngle) / 2
---          in
---          Rect { pos = { x = x, y = y }, width = width + height, height = dist pos lastPos, angle = a }
---        ]
---    }
-
-
-dist : Pos -> Pos -> Float
-dist pos1 pos2 =
-    sqrt ((pos1.x - pos2.x) ^ 2 + (pos1.y - pos2.y) ^ 2)
-
-
-getHeroSweepQuadPoints : Hero -> ( Pos, Pos, Pos, Pos )
+getHeroSweepQuadPoints : Hero -> ( Vec2, Vec2, Vec2, Vec2 )
 getHeroSweepQuadPoints { pos, lastPos, length, angle, lastAngle } =
     let
         ( rotOffsetX, rotOffsetY ) =
@@ -127,18 +76,24 @@ getHeroSweepQuadPoints { pos, lastPos, length, angle, lastAngle } =
         ( rotOffsetXLast, rotOffsetYLast ) =
             fromPolar ( length / 2, lastAngle )
 
+        ( x, y ) =
+            V2.toTuple pos
+
+        ( lastX, lastY ) =
+            V2.toTuple lastPos
+
         -- assuming width is longer than height...
         a =
-            Pos (pos.x - rotOffsetX) (pos.y - rotOffsetY)
+            V2.fromTuple ( x - rotOffsetX, y - rotOffsetY )
 
         b =
-            Pos (pos.x + rotOffsetX) (pos.y + rotOffsetY)
+            V2.fromTuple ( x + rotOffsetX, y + rotOffsetY )
 
         c =
-            Pos (lastPos.x + rotOffsetXLast) (lastPos.y + rotOffsetYLast)
+            V2.fromTuple ( lastX + rotOffsetXLast, lastY + rotOffsetYLast )
 
         d =
-            Pos (lastPos.x - rotOffsetXLast) (lastPos.y - rotOffsetYLast)
+            V2.fromTuple ( lastX - rotOffsetXLast, lastY - rotOffsetYLast )
     in
     ( a, b, c, d )
 
