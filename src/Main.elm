@@ -26,7 +26,7 @@ main =
 
 
 enemySpeed =
-    0
+    0.02
 
 
 
@@ -49,7 +49,7 @@ init { windowWidth, windowHeight, timestamp } =
             , rad = 10
             }
       , hero =
-            { state = Shield
+            { state = Sword --Shield
             , pos = V2.fromTuple ( 100, 50 )
             , lastPos = V2.fromTuple ( 100, 50 )
             , length = 50
@@ -119,28 +119,41 @@ enemyGenerator =
 -- UPDATE
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ windowWidth, windowHeight } as model) =
-    case msg of
-        MouseClick { x, y } ->
-            model ! []
+toggleState : Hero -> Hero
+toggleState hero =
+    case hero.state of
+        Sword ->
+            { hero | state = Shield }
 
-        MouseMove { x, y } ->
-            --{ model | hero = clickHero model.hero } ! []
-            -- TODO
-            viewportToGameCoordinates
-                camera
-                ( cameraWidth, cameraHeight )
-                ( round <| toFloat x - 0.5 * (toFloat windowWidth - cameraWidth)
-                , round <| toFloat y - 0.5 * (toFloat windowHeight - cameraHeight)
-                )
-                |> (\( gameX, gameY ) ->
-                        moveHero (V2.fromTuple ( gameX, gameY )) model.egg.pos model ! []
-                   )
+        Shield ->
+            { hero | state = Sword }
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg ({ windowWidth, windowHeight, hero } as model) =
+    case msg of
+        MouseClick mousePos ->
+            ({ model | hero = toggleState hero } |> mouseMove mousePos) ! []
+
+        MouseMove mousePos ->
+            mouseMove mousePos model ! []
 
         Tick timeDelta ->
             -- max time delta is 30 FPS (1000 / 30 == 33)
             tick (min timeDelta 33) model ! []
+
+
+mouseMove : Mouse.Position -> Model -> Model
+mouseMove { x, y } ({ windowWidth, windowHeight } as model) =
+    viewportToGameCoordinates
+        camera
+        ( cameraWidth, cameraHeight )
+        ( round <| toFloat x - 0.5 * (toFloat windowWidth - cameraWidth)
+        , round <| toFloat y - 0.5 * (toFloat windowHeight - cameraHeight)
+        )
+        |> (\( gameX, gameY ) ->
+                moveHero (V2.fromTuple ( gameX, gameY )) model.egg.pos model
+           )
 
 
 moveHero : Vec2 -> Vec2 -> Model -> Model
@@ -151,15 +164,32 @@ moveHero mousePos eggPos ({ hero } as model) =
 
         ( mouseX, mouseY ) =
             V2.toTuple mousePos
+
+        ( pos, angle ) =
+            case hero.state of
+                Shield ->
+                    toPolar ( eggX - mouseX, eggY - mouseY )
+                        |> (\( _, angle ) ->
+                                ( mousePos, angle + turns 0.25 )
+                           )
+
+                Sword ->
+                    toPolar ( eggX - mouseX, eggY - mouseY )
+                        |> (\( _, angle ) ->
+                                ( fromPolar ( hero.length / 2, angle )
+                                    |> (\( x, y ) ->
+                                            V2.fromTuple ( mouseX - x, mouseY - y )
+                                       )
+                                , angle
+                                )
+                           )
     in
     { model
         | hero =
             { hero
-                | pos = mousePos
+                | pos = pos
                 , lastPos = hero.pos
-                , angle =
-                    toPolar ( eggX - mouseX, eggY - mouseY )
-                        |> (\( _, angle ) -> angle + turns 0.25)
+                , angle = angle
                 , lastAngle = hero.angle
             }
     }
@@ -278,14 +308,6 @@ subscriptions ({ isGameOver } as model) =
             Sub.none
         , AnimationFrame.diffs Tick
         ]
-
-
-
--- COLLISIONS
--- COLLISIONS
--- COLLISIONS
--- tips of pos and lastPos
--- then add "paddle radius"?
 
 
 isTouchingHero : Hero -> Enemy -> Bool
