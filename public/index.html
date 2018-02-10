@@ -9,11 +9,19 @@
     <script>
       var width = window.innerWidth;
       var height = window.innerHeight;
-      Elm.Main.fullscreen({
-        windowWidth: width,
-        windowHeight: height,
+
+      var app = Elm.Main.fullscreen({
+        cameraWidth: width,
+        cameraHeight: height,
         timestamp: Date.now(),
       });
+
+      window.onresize = function() {
+        app.ports.windowChanged.send([
+          window.innerWidth,
+          window.innerHeight,
+        ]);
+      };
     </script>
   </body>
 </html>

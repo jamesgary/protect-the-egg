@@ -16,12 +16,27 @@ eggBorder =
 
 
 view : Model -> Html Msg
-view ({ egg, hero, enemies, config, isGameOver } as model) =
+view ({ egg, hero, enemies, config, isGameOver, cameraWidth, cameraHeight } as model) =
     div [ class "container" ]
         [ Game.renderCentered
             { time = 0
             , camera = camera
-            , size = ( cameraWidth, cameraHeight )
+            , size =
+                let
+                    w =
+                        toFloat cameraWidth
+
+                    h =
+                        toFloat cameraHeight
+                in
+                (if w / h > 16 / 9 then
+                    -- too wide!
+                    ( h * (16 / 9), h )
+                 else
+                    -- too tall!
+                    ( w, w * (9 / 16) )
+                )
+                    |> (\( w, h ) -> ( round w, round h ))
             }
             (List.concat
                 [ viewEgg egg
@@ -113,7 +128,7 @@ viewHero config ({ state, pos, lastPos, angle, lastAngle, length, thickness } as
             fromPolar ( tl / 2, lastAngle )
 
         ( a, b, c, d ) =
-            getHeroSweepQuadPoints hero
+            getHeroSweepQuadPoints config hero
 
         ( x, y ) =
             V2.toTuple pos

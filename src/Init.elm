@@ -6,7 +6,7 @@ import Random
 
 
 init : Flag -> ( Model, Cmd Msg )
-init { windowWidth, windowHeight, timestamp } =
+init { cameraWidth, cameraHeight, timestamp } =
     let
         seed =
             Random.initialSeed timestamp
@@ -15,8 +15,8 @@ init { windowWidth, windowHeight, timestamp } =
             --initEnemies seed
             ( [], seed )
     in
-    ( { windowWidth = windowWidth
-      , windowHeight = windowHeight
+    ( { cameraWidth = cameraWidth
+      , cameraHeight = cameraHeight
       , egg =
             { pos = V2.fromTuple ( 0, 0 )
             , rad = 10
@@ -45,31 +45,29 @@ init { windowWidth, windowHeight, timestamp } =
     )
 
 
-initEnemies : Random.Seed -> ( List Enemy, Random.Seed )
-initEnemies seed =
-    -- for debugging mainly
-    let
-        spacing =
-            10
 
-        frac =
-            8
-    in
-    List.range (round (cameraWidth / frac) // -spacing) (round (cameraWidth / frac) // spacing)
-        |> List.map
-            (\w ->
-                List.range (round (cameraHeight / frac) // -spacing) (round (cameraHeight / frac) // spacing)
-                    |> List.map
-                        (\h ->
-                            { pos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
-                            , lastPos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
-                            , rad = 2
-                            }
-                        )
-            )
-        |> List.concat
-        |> (\e -> ( e, seed ))
-
-
-
+--initEnemies : ( Int, Int ) -> Random.Seed -> ( List Enemy, Random.Seed )
+--initEnemies ( cameraWidth, cameraHeight ) seed =
+--    -- for debugging mainly
+--    let
+--        spacing =
+--            10
+--
+--        frac =
+--            8
+--    in
+--    List.range (round (cameraWidth / frac) // -spacing) (round (cameraWidth / frac) // spacing)
+--        |> List.map
+--            (\w ->
+--                List.range (round (cameraHeight / frac) // -spacing) (round (cameraHeight / frac) // spacing)
+--                    |> List.map
+--                        (\h ->
+--                            { pos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
+--                            , lastPos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
+--                            , rad = 2
+--                            }
+--                        )
+--            )
+--        |> List.concat
+--        |> (\e -> ( e, seed ))
 --Random.step (Random.list 10 enemyGenerator) seed

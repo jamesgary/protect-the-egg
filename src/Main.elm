@@ -8,6 +8,7 @@ import Init exposing (init)
 import Math
 import Math.Vector2 as V2 exposing (Vec2)
 import Mouse
+import Ports exposing (windowChanged)
 import Random
 import Time exposing (Time)
 import View exposing (view)
@@ -64,7 +65,7 @@ toggleState hero =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ windowWidth, windowHeight, hero, config } as model) =
+update msg ({ cameraWidth, cameraHeight, hero, config } as model) =
     case msg of
         MouseClick mousePos ->
             ({ model | hero = toggleState hero } |> mouseMove config mousePos) ! []
@@ -75,6 +76,9 @@ update msg ({ windowWidth, windowHeight, hero, config } as model) =
         Tick timeDelta ->
             -- max time delta is 30 FPS (1000 / 30 == 33)
             tick (min timeDelta 33) model ! []
+
+        WindowChanged ( width, height ) ->
+            { model | cameraWidth = width, cameraHeight = height } ! []
 
         TogglePause ->
             let
@@ -106,17 +110,28 @@ update msg ({ windowWidth, windowHeight, hero, config } as model) =
             { model | config = newConfig } ! []
 
 
-
---[ saveConfig newConfig ]
-
-
 mouseMove : Config -> Mouse.Position -> Model -> Model
-mouseMove config { x, y } ({ windowWidth, windowHeight } as model) =
+mouseMove config { x, y } ({ cameraWidth, cameraHeight } as model) =
+    let
+        w =
+            toFloat cameraWidth
+
+        h =
+            toFloat cameraHeight
+
+        ( innerWidth, innerHeight, xOffset, yOffset ) =
+            if w / h > 16 / 9 then
+                -- too wide!
+                ( h * (16 / 9), h, w - (h * 16 / 9), 0 )
+            else
+                -- too tall!
+                ( w, w * (9 / 16), 0, h - (w * (9 / 16)) )
+    in
     viewportToGameCoordinates
         camera
-        ( cameraWidth, cameraHeight )
-        ( round <| toFloat x - 0.5 * (toFloat windowWidth - cameraWidth)
-        , round <| toFloat y - 0.5 * (toFloat windowHeight - cameraHeight)
+        ( innerWidth |> round, innerHeight |> round )
+        ( round <| toFloat x - 0.5 * xOffset
+        , round <| toFloat y - 0.5 * yOffset
         )
         |> (\( gameX, gameY ) ->
                 moveHero config (V2.fromTuple ( gameX, gameY )) model.egg.pos model
@@ -167,7 +182,7 @@ initTimeToSpawn =
 
 
 tick : Time -> Model -> Model
-tick timeDelta ({ egg, enemies, hero, timeSinceLastSpawn, seed } as model) =
+tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed } as model) =
     let
         curTime =
             model.curTime + timeDelta
@@ -197,7 +212,7 @@ tick timeDelta ({ egg, enemies, hero, timeSinceLastSpawn, seed } as model) =
             enemies
                 |> List.append spawnedEnemies
                 |> List.map (moveEnemyCloserToEgg timeDelta egg)
-                |> List.filterMap (doesCollideWithHero hero)
+                |> List.filterMap (doesCollideWithHero config hero)
 
         isGameOver =
             List.any (doesCollideWithEgg egg) movedEnemies
@@ -222,9 +237,9 @@ doesCollideWithEgg egg enemy =
     dist_ < (egg.rad + enemy.rad)
 
 
-doesCollideWithHero : Hero -> Enemy -> Maybe Enemy
-doesCollideWithHero hero enemy =
-    if isTouchingHero hero enemy then
+doesCollideWithHero : Config -> Hero -> Enemy -> Maybe Enemy
+doesCollideWithHero config hero enemy =
+    if isTouchingHero config hero enemy then
         Nothing
     else
         Just enemy
@@ -269,6 +284,7 @@ subscriptions ({ isGameOver, config } as model) =
     Sub.batch
         [ Mouse.moves MouseMove
         , Mouse.clicks MouseClick
+        , windowChanged WindowChanged
         , if isGameOver || config.isPaused then
             Sub.none
           else
@@ -276,12 +292,12 @@ subscriptions ({ isGameOver, config } as model) =
         ]
 
 
-isTouchingHero : Hero -> Enemy -> Bool
-isTouchingHero hero enemy =
+isTouchingHero : Config -> Hero -> Enemy -> Bool
+isTouchingHero ({ heroLength, heroThickness } as config) hero enemy =
     -- check if distance between
     let
         ( a, b, c, d ) =
-            getHeroSweepQuadPoints hero
+            getHeroSweepQuadPoints config hero
 
         ( e, f ) =
             ( enemy.pos, enemy.lastPos )
@@ -295,5 +311,5 @@ isTouchingHero hero enemy =
                 ]
                 |> Maybe.withDefault -42
     in
-    (minDist <= (hero.thickness / 2) + enemy.rad)
+    (minDist <= (heroThickness * hero.thickness / 2) + enemy.rad)
         || (List.length (List.filter (Math.doLinesIntersect ( enemy.pos, V2.fromTuple ( -1000, -1000 ) )) [ ( a, b ), ( b, c ), ( c, d ), ( d, a ) ]) % 2 == 1)

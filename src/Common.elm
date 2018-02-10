@@ -8,8 +8,8 @@ import Time exposing (Time)
 
 
 type alias Model =
-    { windowWidth : Int
-    , windowHeight : Int
+    { cameraWidth : Int
+    , cameraHeight : Int
     , egg : Egg
     , hero : Hero
     , enemies : List Enemy
@@ -29,8 +29,8 @@ type alias Config =
 
 
 type alias Flag =
-    { windowWidth : Int
-    , windowHeight : Int
+    { cameraWidth : Int
+    , cameraHeight : Int
     , timestamp : Int
     }
 
@@ -76,16 +76,17 @@ type Msg
     | TogglePause
     | ChangeHeroLength String
     | ChangeHeroThickness String
+    | WindowChanged ( Int, Int )
 
 
-getHeroSweepQuadPoints : Hero -> ( Vec2, Vec2, Vec2, Vec2 )
-getHeroSweepQuadPoints { pos, lastPos, length, angle, lastAngle } =
+getHeroSweepQuadPoints : Config -> Hero -> ( Vec2, Vec2, Vec2, Vec2 )
+getHeroSweepQuadPoints { heroLength, heroThickness } { pos, lastPos, length, angle, lastAngle } =
     let
         ( rotOffsetX, rotOffsetY ) =
-            fromPolar ( length / 2, angle )
+            fromPolar ( heroLength * length / 2, angle )
 
         ( rotOffsetXLast, rotOffsetYLast ) =
-            fromPolar ( length / 2, lastAngle )
+            fromPolar ( heroLength * length / 2, lastAngle )
 
         ( x, y ) =
             V2.toTuple pos
@@ -129,11 +130,3 @@ trueThickness { heroThickness } { thickness } =
 
 camera =
     Camera.fixedHeight (16 * 9) ( 0, 0 )
-
-
-cameraWidth =
-    800
-
-
-cameraHeight =
-    450
