@@ -109,6 +109,28 @@ update msg ({ cameraWidth, cameraHeight, hero, config } as model) =
             in
             { model | config = newConfig } ! []
 
+        ChangeEnemySpeed inputStr ->
+            let
+                newConfig =
+                    { config
+                        | enemySpeed =
+                            String.toFloat inputStr
+                                |> Result.withDefault config.enemySpeed
+                    }
+            in
+            { model | config = newConfig } ! []
+
+        ChangeEnemySpawnRate inputStr ->
+            let
+                newConfig =
+                    { config
+                        | enemySpawnRate =
+                            String.toFloat inputStr
+                                |> Result.withDefault config.enemySpawnRate
+                    }
+            in
+            { model | config = newConfig } ! []
+
 
 mouseMove : Config -> Mouse.Position -> Model -> Model
 mouseMove config { x, y } ({ cameraWidth, cameraHeight } as model) =
@@ -177,10 +199,6 @@ moveHero config mousePos eggPos ({ hero } as model) =
     }
 
 
-initTimeToSpawn =
-    500
-
-
 tick : Time -> Model -> Model
 tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed } as model) =
     let
@@ -188,9 +206,9 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed } as mode
             model.curTime + timeDelta
 
         timeToSpawn =
-            -- TODO get faster and faster
-            initTimeToSpawn
+            1000 / config.enemySpawnRate
 
+        --config.enemySpawnRate
         numEnemiesToSpawnFloat =
             (curTime - timeSinceLastSpawn) / timeToSpawn
 
@@ -211,7 +229,7 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed } as mode
         movedEnemies =
             enemies
                 |> List.append spawnedEnemies
-                |> List.map (moveEnemyCloserToEgg timeDelta egg)
+                |> List.map (moveEnemyCloserToEgg config timeDelta egg)
                 |> List.filterMap (doesCollideWithHero config hero)
 
         isGameOver =
@@ -256,8 +274,12 @@ doesCollideWithHero config hero enemy =
 --    Just enemy
 
 
-moveEnemyCloserToEgg : Time -> Egg -> Enemy -> Enemy
-moveEnemyCloserToEgg timeDelta egg enemy =
+baseSpeed =
+    0.02
+
+
+moveEnemyCloserToEgg : Config -> Time -> Egg -> Enemy -> Enemy
+moveEnemyCloserToEgg config timeDelta egg enemy =
     let
         ( eggX, eggY ) =
             V2.toTuple egg.pos
@@ -266,7 +288,7 @@ moveEnemyCloserToEgg timeDelta egg enemy =
             V2.toTuple enemy.pos
     in
     toPolar ( eggX - enemyX, eggY - enemyY )
-        |> (\( _, angle ) -> fromPolar ( timeDelta * enemySpeed, angle ))
+        |> (\( _, angle ) -> fromPolar ( timeDelta * config.enemySpeed * baseSpeed, angle ))
         |> (\( x, y ) ->
                 { enemy
                     | pos = V2.fromTuple ( enemyX + x, enemyY + y )

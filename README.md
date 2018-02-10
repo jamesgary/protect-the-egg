@@ -27,9 +27,9 @@ Day 8
 Day 9
 - [x] Click to change between sword/shield/swordshield
 - [x] Config
+- [x] Configurable enemy speed and spawn rate get faster and faster
 
 Next steps:
-- [ ] Have enemy spawn rate get faster and faster, output spawnrate
 - [ ] Hero slowly moves towards cursor (doesn't snap)
 - [ ] Fix collision with new semi-circle hero
 

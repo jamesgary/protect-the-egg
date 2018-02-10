@@ -39,6 +39,8 @@ init { cameraWidth, cameraHeight, timestamp } =
             { isPaused = True
             , heroLength = 15
             , heroThickness = 1
+            , enemySpeed = 1
+            , enemySpawnRate = 1
             }
       }
     , Cmd.none

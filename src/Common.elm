@@ -25,6 +25,8 @@ type alias Config =
     { isPaused : Bool
     , heroLength : Float
     , heroThickness : Float
+    , enemySpeed : Float
+    , enemySpawnRate : Float
     }
 
 
@@ -76,6 +78,8 @@ type Msg
     | TogglePause
     | ChangeHeroLength String
     | ChangeHeroThickness String
+    | ChangeEnemySpawnRate String
+    | ChangeEnemySpeed String
     | WindowChanged ( Int, Int )
 
 

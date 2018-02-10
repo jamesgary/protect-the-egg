@@ -50,12 +50,14 @@ view ({ egg, hero, enemies, config, isGameOver, cameraWidth, cameraHeight } as m
 
 
 viewConfig : Config -> Html Msg
-viewConfig { isPaused, heroLength, heroThickness } =
+viewConfig { isPaused, heroLength, heroThickness, enemySpeed, enemySpawnRate } =
     div [ class "config" ]
         [ h2 [] [ text "Config" ]
         , configCheckbox "Pause" isPaused TogglePause
         , configInput "Hero Length" heroLength ChangeHeroLength
         , configInput "Hero Thickness" heroThickness ChangeHeroThickness
+        , configInput "Enemy Speed" enemySpeed ChangeEnemySpeed
+        , configInput "Enemy Spawn/s Rate" enemySpawnRate ChangeEnemySpawnRate
         ]
 
 
