@@ -25,7 +25,7 @@ view ({ egg, hero, enemies, config, isGameOver } as model) =
             }
             (List.concat
                 [ viewEgg egg
-                , viewHero hero
+                , viewHero config hero
                 , List.concat (List.map viewEnemy enemies)
                 ]
             )
@@ -35,10 +35,12 @@ view ({ egg, hero, enemies, config, isGameOver } as model) =
 
 
 viewConfig : Config -> Html Msg
-viewConfig { isPaused } =
+viewConfig { isPaused, heroLength, heroThickness } =
     div [ class "config" ]
         [ h2 [] [ text "Config" ]
         , configCheckbox "Pause" isPaused TogglePause
+        , configInput "Hero Length" heroLength ChangeHeroLength
+        , configInput "Hero Thickness" heroThickness ChangeHeroThickness
         ]
 
 
@@ -95,14 +97,20 @@ heroBorder =
     0.5
 
 
-viewHero : Hero -> List Renderable
-viewHero ({ state, pos, lastPos, angle, lastAngle, length, thickness } as hero) =
+viewHero : Config -> Hero -> List Renderable
+viewHero config ({ state, pos, lastPos, angle, lastAngle, length, thickness } as hero) =
     let
+        tl =
+            trueLength config hero
+
+        tt =
+            trueThickness config hero
+
         ( rotOffsetX, rotOffsetY ) =
-            fromPolar ( length / 2, angle )
+            fromPolar ( tl / 2, angle )
 
         ( rotOffsetXLast, rotOffsetYLast ) =
-            fromPolar ( length / 2, lastAngle )
+            fromPolar ( tl / 2, lastAngle )
 
         ( a, b, c, d ) =
             getHeroSweepQuadPoints hero
@@ -115,12 +123,12 @@ viewHero ({ state, pos, lastPos, angle, lastAngle, length, thickness } as hero) 
             (viewShape heroColor)
             [ Rect
                 { pos = pos
-                , width = length
-                , height = thickness
+                , width = tl
+                , height = tt
                 , angle = angle
                 }
-            , Circle { pos = V2.fromTuple ( x + rotOffsetX, y + rotOffsetY ), rad = thickness / 2 }
-            , Circle { pos = V2.fromTuple ( x - rotOffsetX, y - rotOffsetY ), rad = thickness / 2 }
+            , Circle { pos = V2.fromTuple ( x + rotOffsetX, y + rotOffsetY ), rad = tt / 2 }
+            , Circle { pos = V2.fromTuple ( x - rotOffsetX, y - rotOffsetY ), rad = tt / 2 }
             ]
         , [] --[ viewShape (Color.rgb 255 200 200) (Circle { pos = a, rad = 2 })
 

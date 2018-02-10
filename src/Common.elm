@@ -23,6 +23,8 @@ type alias Model =
 
 type alias Config =
     { isPaused : Bool
+    , heroLength : Float
+    , heroThickness : Float
     }
 
 
@@ -72,6 +74,8 @@ type Msg
     | MouseClick Mouse.Position
     | Tick Time
     | TogglePause
+    | ChangeHeroLength String
+    | ChangeHeroThickness String
 
 
 getHeroSweepQuadPoints : Hero -> ( Vec2, Vec2, Vec2, Vec2 )
@@ -103,6 +107,20 @@ getHeroSweepQuadPoints { pos, lastPos, length, angle, lastAngle } =
             V2.fromTuple ( lastX - rotOffsetXLast, lastY - rotOffsetYLast )
     in
     ( a, b, c, d )
+
+
+
+-- config applications
+
+
+trueLength : Config -> Hero -> Float
+trueLength { heroLength } { length } =
+    heroLength * length
+
+
+trueThickness : Config -> Hero -> Float
+trueThickness { heroThickness } { thickness } =
+    heroThickness * thickness
 
 
 
