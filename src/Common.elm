@@ -17,6 +17,12 @@ type alias Model =
     , seed : Random.Seed
     , timeSinceLastSpawn : Time
     , curTime : Time
+    , config : Config
+    }
+
+
+type alias Config =
+    { isPaused : Bool
     }
 
 
@@ -65,6 +71,7 @@ type Msg
     = MouseMove Mouse.Position
     | MouseClick Mouse.Position
     | Tick Time
+    | TogglePause
 
 
 getHeroSweepQuadPoints : Hero -> ( Vec2, Vec2, Vec2, Vec2 )

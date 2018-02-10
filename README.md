@@ -26,6 +26,7 @@ Day 8
 
 Day 9
 - [x] Click to change between sword/shield/swordshield
+- [x] Config
 
 Next steps:
 - [ ] Have enemy spawn rate get faster and faster, output spawnrate

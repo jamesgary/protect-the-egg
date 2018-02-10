@@ -37,3 +37,26 @@ canvas {
   border-radius: 8px;
   top: -90px;
 }
+
+/* CONFIG */
+
+.config {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 20px;
+  width: 200px;
+  background: rgba(255, 255, 255, 0.8);
+  font-family: Arial, sans-serif;
+  padding: 5px 15px 15px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.config-item {
+  margin: 2px 0;
+}
+
+.config-item input {
+  float: right;
+  width: 50px;
+}

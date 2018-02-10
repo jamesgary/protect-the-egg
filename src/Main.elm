@@ -29,10 +29,6 @@ enemySpeed =
     0.02
 
 
-
---0.02
-
-
 init : Flag -> ( Model, Cmd Msg )
 init { windowWidth, windowHeight, timestamp } =
     let
@@ -40,7 +36,8 @@ init { windowWidth, windowHeight, timestamp } =
             Random.initialSeed timestamp
 
         ( enemies, newSeed ) =
-            initEnemies seed
+            --initEnemies seed
+            ( [], seed )
     in
     ( { windowWidth = windowWidth
       , windowHeight = windowHeight
@@ -62,6 +59,9 @@ init { windowWidth, windowHeight, timestamp } =
       , seed = newSeed
       , timeSinceLastSpawn = 0
       , curTime = 0
+      , config =
+            { isPaused = True
+            }
       }
     , Cmd.none
     )
@@ -69,6 +69,7 @@ init { windowWidth, windowHeight, timestamp } =
 
 initEnemies : Random.Seed -> ( List Enemy, Random.Seed )
 initEnemies seed =
+    -- for debugging mainly
     let
         spacing =
             10
@@ -130,7 +131,7 @@ toggleState hero =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ windowWidth, windowHeight, hero } as model) =
+update msg ({ windowWidth, windowHeight, hero, config } as model) =
     case msg of
         MouseClick mousePos ->
             ({ model | hero = toggleState hero } |> mouseMove mousePos) ! []
@@ -141,6 +142,13 @@ update msg ({ windowWidth, windowHeight, hero } as model) =
         Tick timeDelta ->
             -- max time delta is 30 FPS (1000 / 30 == 33)
             tick (min timeDelta 33) model ! []
+
+        TogglePause ->
+            let
+                newConfig =
+                    { config | isPaused = not config.isPaused }
+            in
+            { model | config = newConfig } ! []
 
 
 mouseMove : Mouse.Position -> Model -> Model
@@ -298,15 +306,14 @@ moveEnemyCloserToEgg timeDelta egg enemy =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions ({ isGameOver } as model) =
+subscriptions ({ isGameOver, config } as model) =
     Sub.batch
         [ Mouse.moves MouseMove
         , Mouse.clicks MouseClick
-        , if isGameOver then
+        , if isGameOver || config.isPaused then
             Sub.none
           else
-            Sub.none
-        , AnimationFrame.diffs Tick
+            AnimationFrame.diffs Tick
         ]
 
 

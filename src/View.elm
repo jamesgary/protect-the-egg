@@ -5,8 +5,9 @@ import Common exposing (..)
 import Game.TwoD as Game
 import Game.TwoD.Camera as Camera exposing (Camera)
 import Game.TwoD.Render as Render exposing (Renderable, circle, rectangle)
-import Html exposing (Html, div, h1, text)
-import Html.Attributes exposing (class, style)
+import Html exposing (Html, div, h1, h2, input, label, text)
+import Html.Attributes exposing (checked, class, defaultValue, style, type_)
+import Html.Events exposing (onClick, onInput)
 import Math.Vector2 as V2 exposing (Vec2)
 
 
@@ -15,7 +16,7 @@ eggBorder =
 
 
 view : Model -> Html Msg
-view ({ egg, hero, enemies, isGameOver } as model) =
+view ({ egg, hero, enemies, config, isGameOver } as model) =
     div [ class "container" ]
         [ Game.renderCentered
             { time = 0
@@ -29,6 +30,44 @@ view ({ egg, hero, enemies, isGameOver } as model) =
                 ]
             )
         , viewGameOver isGameOver
+        , viewConfig config
+        ]
+
+
+viewConfig : Config -> Html Msg
+viewConfig { isPaused } =
+    div [ class "config" ]
+        [ h2 [] [ text "Config" ]
+        , configCheckbox "Pause" isPaused TogglePause
+        ]
+
+
+configCheckbox : String -> Bool -> Msg -> Html Msg
+configCheckbox title isChecked msg =
+    div [ class "config-item" ]
+        [ label []
+            [ text title
+            , input
+                [ type_ "checkbox"
+                , checked isChecked
+                , onClick msg
+                ]
+                []
+            ]
+        ]
+
+
+configInput : String -> number -> (String -> Msg) -> Html Msg
+configInput title val msg =
+    div [ class "config-item" ]
+        [ label []
+            [ text title
+            , input
+                [ defaultValue (toString val)
+                , onInput msg
+                ]
+                []
+            ]
         ]
 
 
