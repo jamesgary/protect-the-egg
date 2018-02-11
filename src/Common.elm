@@ -79,7 +79,7 @@ type Shape
 
 
 explosionLongevity =
-    2000
+    1000
 
 
 type Msg

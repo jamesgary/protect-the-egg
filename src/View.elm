@@ -72,7 +72,11 @@ renderCenteredWithAlias { time, size, camera } renderables =
             ]
         ]
         [ WebGL.toHtmlWith
-            [ WebGL.alpha True, WebGL.depth 1 ]
+            [ WebGL.alpha True
+            , WebGL.depth 1
+
+            --, WebGL.antialias
+            ]
             [ Html.Attributes.width w
             , Html.Attributes.height h
             ]
@@ -275,10 +279,10 @@ viewEnemy curTime { pos, rad, state, seed } =
                     age / explosionLongevity
 
                 smokeRad =
-                    (rad * 3) + (rad * progress)
+                    (rad * 2) + (2 * rad * progress)
 
                 opacity =
-                    0.6 - (0.6 * progress)
+                    0.8 - (0.8 * progress)
 
                 -- List (Float, Float, Float)
                 -- [(angle, size, speed)]
@@ -294,19 +298,20 @@ viewEnemy curTime { pos, rad, state, seed } =
                         seed
 
                 color =
-                    Color.rgba 255 100 100 (1 - progress)
+                    Color.rgba 255 200 200 opacity
             in
             [ [ viewTransparentCircle color pos smokeRad ]
-
-            --, particles
-            --    |> List.map
-            --        (\( angle, size, speed ) ->
-            --            fromPolar ( speed * Ease.outCubic progress, angle )
-            --                |> (\( x, y ) ->
-            --                        --viewCircle color (V2.add pos (V2.fromTuple ( x, y ))) (size * rad)
-            --                        viewTransparentCircle (V2.add pos (V2.fromTuple ( x, y )))
-            --                   )
-            --        )
+            , particles
+                |> List.map
+                    (\( angle, size, speed ) ->
+                        fromPolar ( speed * Ease.outCubic progress, angle )
+                            |> (\( x, y ) ->
+                                    viewTransparentCircle
+                                        color
+                                        (V2.add pos (V2.fromTuple ( x, y )))
+                                        (0.5 * smokeRad)
+                               )
+                    )
             ]
                 |> List.concat
 
