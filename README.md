@@ -30,6 +30,7 @@ Day 9
 - [x] Configurable enemy speed and spawn rate get faster and faster
 
 Next steps:
+- [ ] Juice!
 - [ ] Hero slowly moves towards cursor (doesn't snap)
 - [ ] Fix collision with new semi-circle hero
 

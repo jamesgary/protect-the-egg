@@ -63,12 +63,23 @@ type alias Enemy =
     { pos : Vec2
     , lastPos : Vec2
     , rad : Float
+    , state : EnemyState
+    , seed : Random.Seed
     }
+
+
+type EnemyState
+    = Alive
+    | Exploding Time
 
 
 type Shape
     = Circle { pos : Vec2, rad : Float }
     | Rect { pos : Vec2, width : Float, height : Float, angle : Float }
+
+
+explosionLongevity =
+    2000
 
 
 type Msg

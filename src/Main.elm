@@ -45,6 +45,8 @@ enemyGenerator =
                             { pos = V2.fromTuple ( x, y )
                             , lastPos = V2.fromTuple ( x, y )
                             , rad = 2
+                            , state = Alive
+                            , seed = Random.initialSeed (round (angle * toFloat Random.maxInt))
                             }
                        )
             )
@@ -230,7 +232,8 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed } as mode
             enemies
                 |> List.append spawnedEnemies
                 |> List.map (moveEnemyCloserToEgg config timeDelta egg)
-                |> List.filterMap (doesCollideWithHero config hero)
+                |> List.map (collideWithHero config curTime hero)
+                |> List.filter (isAlive config curTime)
 
         isGameOver =
             List.any (doesCollideWithEgg egg) movedEnemies
@@ -246,6 +249,16 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed } as mode
     }
 
 
+isAlive : Config -> Time -> Enemy -> Bool
+isAlive config curTime enemy =
+    case enemy.state of
+        Alive ->
+            True
+
+        Exploding expTime ->
+            expTime > curTime
+
+
 doesCollideWithEgg : Egg -> Enemy -> Bool
 doesCollideWithEgg egg enemy =
     let
@@ -255,12 +268,17 @@ doesCollideWithEgg egg enemy =
     dist_ < (egg.rad + enemy.rad)
 
 
-doesCollideWithHero : Config -> Hero -> Enemy -> Maybe Enemy
-doesCollideWithHero config hero enemy =
-    if isTouchingHero config hero enemy then
-        Nothing
-    else
-        Just enemy
+collideWithHero : Config -> Time -> Hero -> Enemy -> Enemy
+collideWithHero config curTime hero enemy =
+    case enemy.state of
+        Alive ->
+            if isTouchingHero config hero enemy then
+                { enemy | state = Exploding (curTime + explosionLongevity) }
+            else
+                enemy
+
+        Exploding _ ->
+            enemy
 
 
 
@@ -280,21 +298,26 @@ baseSpeed =
 
 moveEnemyCloserToEgg : Config -> Time -> Egg -> Enemy -> Enemy
 moveEnemyCloserToEgg config timeDelta egg enemy =
-    let
-        ( eggX, eggY ) =
-            V2.toTuple egg.pos
+    case enemy.state of
+        Alive ->
+            let
+                ( eggX, eggY ) =
+                    V2.toTuple egg.pos
 
-        ( enemyX, enemyY ) =
-            V2.toTuple enemy.pos
-    in
-    toPolar ( eggX - enemyX, eggY - enemyY )
-        |> (\( _, angle ) -> fromPolar ( timeDelta * config.enemySpeed * baseSpeed, angle ))
-        |> (\( x, y ) ->
-                { enemy
-                    | pos = V2.fromTuple ( enemyX + x, enemyY + y )
-                    , lastPos = enemy.pos
-                }
-           )
+                ( enemyX, enemyY ) =
+                    V2.toTuple enemy.pos
+            in
+            toPolar ( eggX - enemyX, eggY - enemyY )
+                |> (\( _, angle ) -> fromPolar ( timeDelta * config.enemySpeed * baseSpeed, angle ))
+                |> (\( x, y ) ->
+                        { enemy
+                            | pos = V2.fromTuple ( enemyX + x, enemyY + y )
+                            , lastPos = enemy.pos
+                        }
+                   )
+
+        _ ->
+            enemy
 
 
 

@@ -12,8 +12,9 @@ init { cameraWidth, cameraHeight, timestamp } =
             Random.initialSeed timestamp
 
         ( enemies, newSeed ) =
-            --initEnemies seed
-            ( [], seed )
+            initEnemies ( cameraWidth, cameraHeight ) seed
+
+        --( [], seed )
     in
     ( { cameraWidth = cameraWidth
       , cameraHeight = cameraHeight
@@ -36,40 +37,54 @@ init { cameraWidth, cameraHeight, timestamp } =
       , timeSinceLastSpawn = 0
       , curTime = 0
       , config =
-            { isPaused = True
-            , heroLength = 15
-            , heroThickness = 1
-            , enemySpeed = 1
-            , enemySpawnRate = 1
-            }
+            if True then
+                -- for debugging
+                { isPaused = False
+                , heroLength = 15
+                , heroThickness = 1
+                , enemySpeed = 0
+                , enemySpawnRate = 0
+                }
+            else
+                -- kinda good
+                { isPaused = True
+                , heroLength = 15
+                , heroThickness = 1
+                , enemySpeed = 2
+                , enemySpawnRate = 2
+                }
       }
     , Cmd.none
     )
 
 
+initEnemies : ( Int, Int ) -> Random.Seed -> ( List Enemy, Random.Seed )
+initEnemies ( cameraWidth, cameraHeight ) seed =
+    -- for debugging mainly
+    let
+        spacing =
+            10
 
---initEnemies : ( Int, Int ) -> Random.Seed -> ( List Enemy, Random.Seed )
---initEnemies ( cameraWidth, cameraHeight ) seed =
---    -- for debugging mainly
---    let
---        spacing =
---            10
---
---        frac =
---            8
---    in
---    List.range (round (cameraWidth / frac) // -spacing) (round (cameraWidth / frac) // spacing)
---        |> List.map
---            (\w ->
---                List.range (round (cameraHeight / frac) // -spacing) (round (cameraHeight / frac) // spacing)
---                    |> List.map
---                        (\h ->
---                            { pos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
---                            , lastPos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
---                            , rad = 2
---                            }
---                        )
---            )
---        |> List.concat
---        |> (\e -> ( e, seed ))
+        frac =
+            8
+    in
+    List.range (round (toFloat cameraWidth / frac) // -spacing) (round (toFloat cameraWidth / frac) // spacing)
+        |> List.map
+            (\w ->
+                List.range (round (toFloat cameraHeight / frac) // -spacing) (round (toFloat cameraHeight / frac) // spacing)
+                    |> List.map
+                        (\h ->
+                            { pos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
+                            , lastPos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
+                            , rad = 2
+                            , state = Alive
+                            , seed = seed
+                            }
+                        )
+            )
+        |> List.concat
+        |> (\e -> ( e, seed ))
+
+
+
 --Random.step (Random.list 10 enemyGenerator) seed
