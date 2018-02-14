@@ -16,9 +16,8 @@ init { cameraWidth, cameraHeight, timestamp } =
             Random.initialSeed timestamp
 
         ( enemies, newSeed ) =
-            initEnemies ( cameraWidth, cameraHeight ) seed
-
-        --( [], seed )
+            --initEnemies ( cameraWidth, cameraHeight ) seed
+            ( [], seed )
     in
     ( { cameraWidth = cameraWidth
       , cameraHeight = cameraHeight
@@ -34,6 +33,7 @@ init { cameraWidth, cameraHeight, timestamp } =
             , angle = 0
             , lastAngle = 0
             , thickness = 1
+            , vel = V2.fromTuple ( 0, 0 )
             }
       , enemies = enemies
       , isGameOver = False

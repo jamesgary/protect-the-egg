@@ -48,6 +48,7 @@ type alias Hero =
     { state : HeroState
     , pos : Vec2
     , lastPos : Vec2
+    , vel : Vec2
     , angle : Float
     , lastAngle : Float
     , length : Float -- length represents the inner rect, not the circle bumpers

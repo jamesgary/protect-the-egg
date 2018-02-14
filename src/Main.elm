@@ -190,6 +190,53 @@ heroPosFromHilt config hero hiltPos =
                 |> V2.add hiltPos
 
 
+stiffness =
+    170
+
+
+damping =
+    20
+
+
+pTolerance =
+    0.01
+
+
+vTolerance =
+    0.01
+
+
+moveHilt : Config -> Time -> Vec2 -> Vec2 -> Vec2 -> ( Vec2, Vec2 )
+moveHilt config timeDelta oldPos oldVel targetPos =
+    -- From https://github.com/mdgriffith/elm-style-animation/blob/
+    -- 86f81b0f5a28289894fe61c14fa2c34c0bf895ec/src/Animation/Model.elm#L1591-L1623
+    let
+        fspring =
+            V2.sub targetPos oldPos
+                |> V2.scale stiffness
+
+        fdamper =
+            oldVel
+                |> V2.scale -damping
+
+        a =
+            V2.add fspring fdamper
+
+        newVelocity =
+            V2.add oldVel (V2.scale (timeDelta / 1000) a)
+
+        newPos =
+            V2.add oldPos (V2.scale (timeDelta / 1000) newVelocity)
+
+        dx =
+            V2.distance targetPos newPos
+    in
+    if dx < pTolerance && V2.length newVelocity < vTolerance then
+        ( targetPos, V2.fromTuple ( 0, 0 ) )
+    else
+        ( newPos, newVelocity )
+
+
 moveHero : Time -> Model -> Hero
 moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
     let
@@ -200,22 +247,8 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
         hiltPos =
             hiltPosFromHero config hero
 
-        ( mouseX, mouseY ) =
-            V2.toTuple mousePos
-
-        maxDist =
-            heroSpeed * timeDelta
-
-        newHiltPos =
-            V2.distance mousePos hiltPos
-                |> (\dist ->
-                        if dist > maxDist then
-                            V2.sub hiltPos mousePos
-                                |> V2.scale (maxDist / dist)
-                                |> V2.sub hiltPos
-                        else
-                            mousePos
-                   )
+        ( newHiltPos, newVel ) =
+            moveHilt config timeDelta hiltPos hero.vel mousePos
 
         angle =
             case hero.state of
@@ -238,6 +271,7 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
     { hero
         | pos = heroPosFromHilt config { hero | angle = angle } newHiltPos
         , lastPos = hero.pos
+        , vel = newVel
         , angle = angle
         , lastAngle = hero.angle
     }

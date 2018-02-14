@@ -37,11 +37,12 @@ Day 11
 
 Day 13
 - [x] Restore movement
+- [x] Hero slowly moves towards cursor (doesn't snap)
+- [x] Hero accelerates to desired location (spring!)
 
 
 Next steps:
 - [ ] Juice!
-- [ ] Hero slowly moves towards cursor (doesn't snap)
 
 Future steps:
 - [ ] Start Screen
