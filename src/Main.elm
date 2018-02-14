@@ -69,11 +69,11 @@ toggleState hero =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ cameraWidth, cameraHeight, hero, config } as model) =
     case msg of
-        MouseClick mousePos ->
-            ({ model | hero = toggleState hero } |> mouseMove config mousePos) ! []
+        MouseClick _ ->
+            { model | hero = toggleState hero } ! []
 
         MouseMove mousePos ->
-            mouseMove config mousePos model ! []
+            { model | mousePos = trueMousePos model mousePos } ! []
 
         Tick timeDelta ->
             -- max time delta is 30 FPS (1000 / 30 == 33)
@@ -134,8 +134,8 @@ update msg ({ cameraWidth, cameraHeight, hero, config } as model) =
             { model | config = newConfig } ! []
 
 
-mouseMove : Config -> Mouse.Position -> Model -> Model
-mouseMove config { x, y } ({ cameraWidth, cameraHeight } as model) =
+trueMousePos : Model -> Mouse.Position -> Vec2
+trueMousePos { cameraWidth, cameraHeight } { x, y } =
     let
         w =
             toFloat cameraWidth
@@ -158,59 +158,105 @@ mouseMove config { x, y } ({ cameraWidth, cameraHeight } as model) =
         , round <| toFloat y - 0.5 * yOffset
         )
         |> (\( gameX, gameY ) ->
-                moveHero config (V2.fromTuple ( gameX, gameY )) model.egg.pos model
+                V2.fromTuple ( gameX, gameY )
            )
 
 
-moveHero : Config -> Vec2 -> Vec2 -> Model -> Model
-moveHero config mousePos eggPos ({ hero } as model) =
+heroSpeed =
+    0.3
+
+
+hiltPosFromHero : Config -> Hero -> Vec2
+hiltPosFromHero config hero =
+    case hero.state of
+        Shield ->
+            hero.pos
+
+        Sword ->
+            fromPolar ( trueLength config hero / 2, hero.angle )
+                |> V2.fromTuple
+                |> V2.sub hero.pos
+
+
+heroPosFromHilt : Config -> Hero -> Vec2 -> Vec2
+heroPosFromHilt config hero hiltPos =
+    case hero.state of
+        Shield ->
+            hiltPos
+
+        Sword ->
+            fromPolar ( trueLength config hero / 2, hero.angle )
+                |> V2.fromTuple
+                |> V2.add hiltPos
+
+
+moveHero : Time -> Model -> Hero
+moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
     let
         ( eggX, eggY ) =
-            V2.toTuple eggPos
+            V2.toTuple egg.pos
+
+        -- hilt is the mouse-controllable point
+        hiltPos =
+            hiltPosFromHero config hero
 
         ( mouseX, mouseY ) =
             V2.toTuple mousePos
 
-        ( pos, angle ) =
+        maxDist =
+            heroSpeed * timeDelta
+
+        newHiltPos =
+            V2.distance mousePos hiltPos
+                |> (\dist ->
+                        if dist > maxDist then
+                            V2.sub hiltPos mousePos
+                                |> V2.scale (maxDist / dist)
+                                |> V2.sub hiltPos
+                        else
+                            mousePos
+                   )
+
+        angle =
             case hero.state of
                 Shield ->
-                    toPolar ( eggX - mouseX, eggY - mouseY )
+                    V2.sub egg.pos newHiltPos
+                        |> V2.toTuple
+                        |> toPolar
                         |> (\( _, angle ) ->
-                                ( mousePos, angle + turns 0.25 )
+                                angle + turns 0.25
                            )
 
                 Sword ->
-                    toPolar ( eggX - mouseX, eggY - mouseY )
+                    V2.sub egg.pos newHiltPos
+                        |> V2.toTuple
+                        |> toPolar
                         |> (\( _, angle ) ->
-                                ( fromPolar ( trueLength config hero / 2, angle )
-                                    |> (\( x, y ) ->
-                                            V2.fromTuple ( mouseX - x, mouseY - y )
-                                       )
-                                , angle
-                                )
+                                angle + turns 0.5
                            )
     in
-    { model
-        | hero =
-            { hero
-                | pos = pos
-                , lastPos = hero.pos
-                , angle = angle
-                , lastAngle = hero.angle
-            }
+    { hero
+        | pos = heroPosFromHilt config { hero | angle = angle } newHiltPos
+        , lastPos = hero.pos
+        , angle = angle
+        , lastAngle = hero.angle
     }
 
 
 tick : Time -> Model -> Model
-tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed } as model) =
+tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos } as model) =
     let
         curTime =
             model.curTime + timeDelta
 
+        -- MOVE HERO
+        movedHero =
+            moveHero timeDelta model
+
+        -- SPAWN ENEMIES
         timeToSpawn =
             1000 / config.enemySpawnRate
 
-        --config.enemySpawnRate
         numEnemiesToSpawnFloat =
             (curTime - timeSinceLastSpawn) / timeToSpawn
 
@@ -232,7 +278,7 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed } as mode
             enemies
                 |> List.append spawnedEnemies
                 |> List.map (moveEnemyCloserToEgg config timeDelta egg)
-                |> List.map (collideWithHero config curTime hero)
+                |> List.map (collideWithHero config curTime movedHero)
                 |> List.filter (isAlive config curTime)
 
         isGameOver =
@@ -246,6 +292,7 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed } as mode
         , curTime = curTime
         , timeSinceLastSpawn = newTimeSinceLastSpawn
         , seed = newSeed
+        , hero = movedHero
     }
 
 

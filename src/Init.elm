@@ -5,6 +5,10 @@ import Math.Vector2 as V2 exposing (Vec2)
 import Random
 
 
+startingPos =
+    V2.vec2 0 50
+
+
 init : Flag -> ( Model, Cmd Msg )
 init { cameraWidth, cameraHeight, timestamp } =
     let
@@ -23,9 +27,9 @@ init { cameraWidth, cameraHeight, timestamp } =
             , rad = 10
             }
       , hero =
-            { state = Sword --Shield
-            , pos = V2.fromTuple ( 100, 50 )
-            , lastPos = V2.fromTuple ( 100, 50 )
+            { state = Shield -- Sword
+            , pos = startingPos
+            , lastPos = startingPos
             , length = 1
             , angle = 0
             , lastAngle = 0
@@ -53,6 +57,7 @@ init { cameraWidth, cameraHeight, timestamp } =
                 , enemySpeed = 2
                 , enemySpawnRate = 2
                 }
+      , mousePos = startingPos
       }
     , Cmd.none
     )

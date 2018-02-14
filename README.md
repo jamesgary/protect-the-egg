@@ -29,10 +29,19 @@ Day 9
 - [x] Config
 - [x] Configurable enemy speed and spawn rate get faster and faster
 
+Day 10
+- [x] Figure out WebGL and alpha
+
+Day 11
+- [x] Add particle effects
+
+Day 13
+- [x] Restore movement
+
+
 Next steps:
 - [ ] Juice!
 - [ ] Hero slowly moves towards cursor (doesn't snap)
-- [ ] Fix collision with new semi-circle hero
 
 Future steps:
 - [ ] Start Screen

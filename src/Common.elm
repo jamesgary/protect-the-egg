@@ -18,6 +18,7 @@ type alias Model =
     , timeSinceLastSpawn : Time
     , curTime : Time
     , config : Config
+    , mousePos : Vec2
     }
 
 
