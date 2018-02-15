@@ -46,8 +46,8 @@ init { cameraWidth, cameraHeight, timestamp } =
                 { isPaused = False
                 , heroLength = 40 --20
                 , heroThickness = 6 --3
-                , enemySpeed = 0
-                , enemySpawnRate = 0
+                , enemySpeed = 1
+                , enemySpawnRate = 0.5
                 }
             else
                 -- kinda good

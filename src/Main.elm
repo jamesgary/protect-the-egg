@@ -52,6 +52,27 @@ enemyGenerator =
             )
 
 
+clusterGenerator : Random.Generator (List Enemy)
+clusterGenerator =
+    Random.float 0 (turns 1)
+        |> Random.map
+            (\angle ->
+                List.range 0 10
+                    |> List.map
+                        (\i ->
+                            fromPolar ( enemyStartingDistFromEgg + (5 * toFloat i), angle )
+                                |> (\( x, y ) ->
+                                        { pos = V2.fromTuple ( x, y )
+                                        , lastPos = V2.fromTuple ( x, y )
+                                        , rad = 2
+                                        , state = Alive
+                                        , seed = Random.initialSeed (round (angle * toFloat Random.maxInt * toFloat i))
+                                        }
+                                   )
+                        )
+            )
+
+
 
 -- UPDATE
 
@@ -298,7 +319,7 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos
 
         ( ( spawnedEnemies, newSeed ), newTimeSinceLastSpawn ) =
             if numEnemiesToSpawnInt >= 1 then
-                ( Random.step (Random.list numEnemiesToSpawnInt enemyGenerator) seed
+                ( Random.step (Random.list numEnemiesToSpawnInt clusterGenerator) seed
                 , curTime - timePassedSinceLastSpawn
                 )
             else
@@ -306,15 +327,16 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos
 
         movedEnemies =
             enemies
-                |> List.append spawnedEnemies
+                |> List.append (spawnedEnemies |> List.concat)
                 |> List.map (moveEnemyCloserToEgg config timeDelta egg)
                 |> List.map (collideWithHero config curTime movedHero)
                 |> List.filter (isAlive config curTime)
 
         isGameOver =
             List.any (doesCollideWithEgg egg) movedEnemies
-                -- FIXME
-                |> always False
+
+        -- FIXME
+        --|> always False
     in
     { model
         | enemies = movedEnemies
@@ -356,17 +378,6 @@ collideWithHero config curTime hero enemy =
 
         Exploding _ ->
             enemy
-
-
-
---let
---    dist_ =
---        dist hero.pos enemy.pos
---in
---if dist_ < (hero.rad + enemy.rad) then
---    Nothing
---else
---    Just enemy
 
 
 baseSpeed =

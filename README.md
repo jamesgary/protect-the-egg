@@ -42,6 +42,7 @@ Day 13
 
 Day 14
 - [x] Durdle power! (hero has turtlesque bod)
+- [x] Clustered enemies
 
 Next steps:
 - [ ] Juice!
@@ -55,6 +56,8 @@ Future steps:
 - [ ] Benchmark
 - [ ] Quadtrees
 - [ ] Save progress
+
+### Random notes
 
 Possible heroes archetypes:
 - Sword (long and pointy)

@@ -194,7 +194,6 @@ viewHero config ({ state, pos, lastPos, angle, lastAngle, length, thickness } as
                 |> V2.fromTuple
 
         eyeRad =
-            -- (eyes occupy third of thickness)
             tt / 3
 
         eyePupilRad =
