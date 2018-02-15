@@ -69,8 +69,8 @@ toggleState hero =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ cameraWidth, cameraHeight, hero, config } as model) =
     case msg of
-        MouseClick _ ->
-            { model | hero = toggleState hero } ! []
+        MouseClick mousePos ->
+            { model | hero = toggleState hero |> (\hero -> { hero | pos = trueMousePos model mousePos }) } ! []
 
         MouseMove mousePos ->
             { model | mousePos = trueMousePos model mousePos } ! []
@@ -160,10 +160,6 @@ trueMousePos { cameraWidth, cameraHeight } { x, y } =
         |> (\( gameX, gameY ) ->
                 V2.fromTuple ( gameX, gameY )
            )
-
-
-heroSpeed =
-    0.3
 
 
 hiltPosFromHero : Config -> Hero -> Vec2

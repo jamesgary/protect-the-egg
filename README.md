@@ -40,6 +40,8 @@ Day 13
 - [x] Hero slowly moves towards cursor (doesn't snap)
 - [x] Hero accelerates to desired location (spring!)
 
+Day 14
+- [x] Durdle power! (hero has turtlesque bod)
 
 Next steps:
 - [ ] Juice!

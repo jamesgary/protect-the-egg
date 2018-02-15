@@ -19,6 +19,15 @@ eggBorder =
     0.8
 
 
+colors =
+    { sand = Color.rgb 248 233 156
+    , shellBorder = Color.rgb 50 120 30 --21 93 1
+    , shellInner = Color.rgb 127 255 89 --(57, 220, 10)
+    , durdleSkin = Color.rgb 255 255 0 --219 255 70
+    , durdleSkinBorder = Color.rgb 180 160 0 --220 200 0 --219 255 70
+    }
+
+
 view : Model -> Html Msg
 view ({ egg, hero, enemies, config, curTime, isGameOver, cameraWidth, cameraHeight } as model) =
     div [ class "container" ]
@@ -74,8 +83,7 @@ renderCenteredWithAlias { time, size, camera } renderables =
         [ WebGL.toHtmlWith
             [ WebGL.alpha True
             , WebGL.depth 1
-
-            --, WebGL.antialias
+            , WebGL.antialias
             ]
             [ Html.Attributes.width w
             , Html.Attributes.height h
@@ -158,8 +166,8 @@ viewCircle color pos rad =
         }
 
 
-heroBorder =
-    0.5
+borderWidth =
+    1
 
 
 viewHero : Config -> Hero -> List Renderable
@@ -171,36 +179,88 @@ viewHero config ({ state, pos, lastPos, angle, lastAngle, length, thickness } as
         tt =
             trueThickness config hero
 
-        ( rotOffsetX, rotOffsetY ) =
+        sideOffset =
             fromPolar ( tl / 2, angle )
+                |> V2.fromTuple
 
-        ( rotOffsetXLast, rotOffsetYLast ) =
-            fromPolar ( tl / 2, lastAngle )
+        halfwayDownOffset =
+            fromPolar ( tt / 4, angle + turns 0.25 )
+                |> V2.fromTuple
 
-        ( a, b, c, d ) =
-            getHeroSweepQuadPoints config hero
+        almostHalfwayDownOffset =
+            fromPolar ( (tt - (2 * borderWidth)) / 4, angle + turns 0.25 )
+                |> V2.fromTuple
 
         ( x, y ) =
             V2.toTuple pos
     in
     List.concat
-        [ List.map
-            (viewShape heroColor)
+        [ -- shell border
+          List.map
+            (viewShape colors.shellBorder)
             [ Rect
                 { pos = pos
                 , width = tl
                 , height = tt
                 , angle = angle
                 }
-            , Circle { pos = V2.fromTuple ( x + rotOffsetX, y + rotOffsetY ), rad = tt / 2 }
-            , Circle { pos = V2.fromTuple ( x - rotOffsetX, y - rotOffsetY ), rad = tt / 2 }
+            , Circle
+                { pos = V2.add pos sideOffset
+                , rad = tt / 2
+                }
+            , Circle
+                { pos = V2.sub pos sideOffset
+                , rad = tt / 2
+                }
             ]
-        , [] --[ viewShape (Color.rgb 255 200 200) (Circle { pos = a, rad = 2 })
-
-        --, viewShape (Color.rgb 255 100 100) (Circle { pos = b, rad = 2 })
-        --, viewShape (Color.rgb 0 255 255) (Circle { pos = c, rad = 2 })
-        --, viewShape (Color.rgb 0 0 255) (Circle { pos = d, rad = 2 })
-        --]
+        , -- shell fill
+          List.map
+            (viewShape colors.shellInner)
+            [ Rect
+                { pos = pos
+                , width = tl - borderWidth
+                , height = tt - borderWidth
+                , angle = angle
+                }
+            , Circle
+                { pos = V2.add pos sideOffset
+                , rad = (tt / 2) - (0.5 * borderWidth)
+                }
+            , Circle
+                { pos = V2.sub pos sideOffset
+                , rad = (tt / 2) - (0.5 * borderWidth)
+                }
+            ]
+        , -- inner shell border
+          List.map
+            (viewShape colors.shellBorder)
+            [ Rect
+                { pos = V2.sub pos almostHalfwayDownOffset
+                , width = tl + borderWidth
+                , height = (tt + (2 * borderWidth)) / 2
+                , angle = angle
+                }
+            ]
+        , -- durdle body border
+          List.map
+            (viewShape colors.durdleSkinBorder)
+            [ Rect
+                { pos = V2.sub pos halfwayDownOffset
+                , width = tl
+                , height = tt / 2
+                , angle = angle
+                }
+            ]
+        , -- durdle body fill
+          List.map
+            (viewShape colors.durdleSkin)
+            [ Rect
+                { pos = V2.sub pos almostHalfwayDownOffset
+                , width = tl
+                , height = tt / 2
+                , angle = angle
+                }
+            ]
         ]
 
 
@@ -210,12 +270,6 @@ heroColor =
 
 blurColor =
     Color.rgb 255 255 255
-
-
-
---[ List.map (viewShape (Color.rgb 255 195 246)) last
---, List.map (viewShape (Color.rgb 255 55 186)) cur
---]
 
 
 viewShape : Color -> Shape -> Renderable
@@ -238,36 +292,12 @@ viewShape color shape =
                 }
 
 
-
---[{- Render.shapeWithOptions rectangle
---    { color = Color.black
---    , position = ( x, y, 0 )
---    , size =
---        ( width + (heroBorder * 2)
---        , height + (heroBorder * 2)
---        )
---    , rotation = angle
---    , pivot = ( 0.5, 0.5 )
---    }
---    ,
--- -}
--- {- Render.shapeWithOptions rectangle
---    { color = Color.rgb 255 55 186
---    , position = ( x, y, 0 )
---    , size = ( width, height )
---    , rotation = angle
---    , pivot = ( 0.5, 0.5 )
---    }
--- -}
---]
-
-
 viewEnemy : Time -> Enemy -> List Renderable
 viewEnemy curTime { pos, rad, state, seed } =
     case state of
         Alive ->
             [ --viewCircle Color.black pos (rad + eggBorder),
-              viewCircle Color.red pos rad
+              viewCircle (Color.rgba 255 0 0 0.02) pos rad
             ]
 
         Exploding expTime ->
@@ -378,7 +408,7 @@ uniform float alpha;
 void main () {
   float dist = length(vec2(0.5, 0.5) - vcoord);
 
-  float circleAlpha = 1.0 - smoothstep(radius - 0.01, radius, dist);
+  float circleAlpha = 1.0 - smoothstep(radius - 0.09, radius, dist);
   vec4 color = vec4(red, green, blue, circleAlpha * alpha);
 
   gl_FragColor = color;

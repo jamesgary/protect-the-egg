@@ -23,7 +23,7 @@ init { cameraWidth, cameraHeight, timestamp } =
       , cameraHeight = cameraHeight
       , egg =
             { pos = V2.fromTuple ( 0, 0 )
-            , rad = 10
+            , rad = 3
             }
       , hero =
             { state = Shield -- Sword
@@ -44,8 +44,8 @@ init { cameraWidth, cameraHeight, timestamp } =
             if True then
                 -- for debugging
                 { isPaused = False
-                , heroLength = 15
-                , heroThickness = 1
+                , heroLength = 40 --20
+                , heroThickness = 6 --3
                 , enemySpeed = 0
                 , enemySpawnRate = 0
                 }
