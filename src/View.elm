@@ -25,6 +25,8 @@ colors =
     , shellInner = Color.rgb 127 255 89 --(57, 220, 10)
     , durdleSkin = Color.rgb 255 255 0 --219 255 70
     , durdleSkinBorder = Color.rgb 180 160 0 --220 200 0 --219 255 70
+    , eyeFill = Color.rgb 255 255 255
+    , eyePupil = Color.rgb 0 0 0
     }
 
 
@@ -191,6 +193,29 @@ viewHero config ({ state, pos, lastPos, angle, lastAngle, length, thickness } as
             fromPolar ( (tt - (2 * borderWidth)) / 4, angle + turns 0.25 )
                 |> V2.fromTuple
 
+        eyeRad =
+            -- (eyes occupy third of thickness)
+            tt / 3
+
+        eyePupilRad =
+            eyeRad / 2
+
+        leftEye =
+            fromPolar ( eyeRad, angle )
+                |> V2.fromTuple
+
+        rightEye =
+            fromPolar ( -eyeRad, angle )
+                |> V2.fromTuple
+
+        leftEyePupil =
+            leftEye
+                |> V2.add (V2.fromTuple (fromPolar ( 1, angle + turns -0.25 )))
+
+        rightEyePupil =
+            rightEye
+                |> V2.add (V2.fromTuple (fromPolar ( 1, angle + turns -0.25 )))
+
         ( x, y ) =
             V2.toTuple pos
     in
@@ -259,6 +284,30 @@ viewHero config ({ state, pos, lastPos, angle, lastAngle, length, thickness } as
                 , width = tl
                 , height = tt / 2
                 , angle = angle
+                }
+            ]
+        , -- eye fills
+          List.map
+            (viewShape colors.eyeFill)
+            [ Circle
+                { pos = V2.sub pos leftEye
+                , rad = eyeRad
+                }
+            , Circle
+                { pos = V2.sub pos rightEye
+                , rad = eyeRad
+                }
+            ]
+        , -- eye pupils
+          List.map
+            (viewShape colors.eyePupil)
+            [ Circle
+                { pos = V2.sub pos leftEyePupil
+                , rad = eyePupilRad
+                }
+            , Circle
+                { pos = V2.sub pos rightEyePupil
+                , rad = eyePupilRad
                 }
             ]
         ]
