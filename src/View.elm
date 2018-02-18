@@ -28,6 +28,8 @@ colors =
     , durdleSkinBorder = Color.rgb 180 160 0 --220 200 0 --219 255 70
     , eyeFill = Color.rgb 255 255 255
     , eyePupil = Color.rgb 0 0 0
+    , beachBg = Color.rgb 248 233 156
+    , oceanBlue = Color.rgb 50 50 255
     }
 
 
@@ -55,7 +57,8 @@ view ({ egg, hero, enemies, config, curTime, isGameOver, cameraWidth, cameraHeig
                     |> (\( w, h ) -> ( round <| w, round <| h ))
             }
             (List.concat
-                [ viewEgg egg
+                [ viewBg model
+                , viewEgg egg
                 , viewHero config hero
                 , List.concat (List.map (viewEnemy curTime) enemies)
                 ]
@@ -135,6 +138,25 @@ configInput title val msg =
                 []
             ]
         ]
+
+
+viewBg : Model -> List Renderable
+viewBg { cameraWidth, cameraHeight } =
+    [ viewShape colors.oceanBlue
+        (Rect
+            { pos = V2.fromTuple ( 0, 0 )
+            , width = toFloat cameraWidth
+            , height = toFloat cameraHeight
+            , angle = 0
+            }
+        )
+    , viewShape colors.beachBg
+        (Circle
+            { pos = V2.fromTuple ( 0, 0 )
+            , rad = 0.07 * toFloat cameraHeight -- wat
+            }
+        )
+    ]
 
 
 viewEgg : Egg -> List Renderable

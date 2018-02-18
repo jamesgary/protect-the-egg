@@ -44,6 +44,11 @@ Day 14
 - [x] Durdle power! (hero has turtlesque bod)
 - [x] Clustered enemies
 
+Day 18
+- [x] Configurable cluster size
+- [ ] Draw beach and ocean
+- [ ] Bounce
+
 Next steps:
 - [ ] 
 
