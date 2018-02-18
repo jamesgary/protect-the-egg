@@ -41,22 +41,13 @@ init { cameraWidth, cameraHeight, timestamp } =
       , timeSinceLastSpawn = 0
       , curTime = 0
       , config =
-            if True then
-                -- for debugging
-                { isPaused = False
-                , heroLength = 40 --20
-                , heroThickness = 6 --3
-                , enemySpeed = 1
-                , enemySpawnRate = 0.5
-                }
-            else
-                -- kinda good
-                { isPaused = True
-                , heroLength = 15
-                , heroThickness = 1
-                , enemySpeed = 2
-                , enemySpawnRate = 2
-                }
+            { isPaused = False
+            , heroLength = 40 --20
+            , heroThickness = 6 --3
+            , enemySpeed = 1
+            , enemySpawnRate = 0.5
+            , enemyClusterSize = 3
+            }
       , mousePos = startingPos
       }
     , Cmd.none

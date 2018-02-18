@@ -45,9 +45,10 @@ Day 14
 - [x] Clustered enemies
 
 Next steps:
-- [ ] Juice!
+- [ ] 
 
 Future steps:
+- [ ] Juice!
 - [ ] Start Screen
 - [ ] Actual Level
 - [ ] Onboarding/Tutorial
@@ -87,3 +88,13 @@ There should be some dissencentive for moving mouse/shield over egg
 - damages egg?
 
 any way to move physics / game logic into GPU?
+
+---
+
+Everytime you destroy an enemy, your "egg meter" increases
+When it's full, you can lay an egg in your nest
+Slightly increases size of nest, but increases final score
+
+
+
+

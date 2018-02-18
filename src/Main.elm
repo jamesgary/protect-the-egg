@@ -52,12 +52,12 @@ enemyGenerator =
             )
 
 
-clusterGenerator : Random.Generator (List Enemy)
-clusterGenerator =
+clusterGenerator : Config -> Random.Generator (List Enemy)
+clusterGenerator { enemyClusterSize } =
     Random.float 0 (turns 1)
         |> Random.map
             (\angle ->
-                List.range 0 10
+                List.range 0 (enemyClusterSize - 1)
                     |> List.map
                         (\i ->
                             fromPolar ( enemyStartingDistFromEgg + (5 * toFloat i), angle )
@@ -150,6 +150,17 @@ update msg ({ cameraWidth, cameraHeight, hero, config } as model) =
                         | enemySpawnRate =
                             String.toFloat inputStr
                                 |> Result.withDefault config.enemySpawnRate
+                    }
+            in
+            { model | config = newConfig } ! []
+
+        ChangeEnemyClusterSize inputStr ->
+            let
+                newConfig =
+                    { config
+                        | enemyClusterSize =
+                            String.toInt inputStr
+                                |> Result.withDefault config.enemyClusterSize
                     }
             in
             { model | config = newConfig } ! []
@@ -319,7 +330,7 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos
 
         ( ( spawnedEnemies, newSeed ), newTimeSinceLastSpawn ) =
             if numEnemiesToSpawnInt >= 1 then
-                ( Random.step (Random.list numEnemiesToSpawnInt clusterGenerator) seed
+                ( Random.step (Random.list numEnemiesToSpawnInt (clusterGenerator config)) seed
                 , curTime - timePassedSinceLastSpawn
                 )
             else

@@ -28,6 +28,7 @@ type alias Config =
     , heroThickness : Float
     , enemySpeed : Float
     , enemySpawnRate : Float
+    , enemyClusterSize : Int
     }
 
 
@@ -93,6 +94,7 @@ type Msg
     | ChangeHeroThickness String
     | ChangeEnemySpawnRate String
     | ChangeEnemySpeed String
+    | ChangeEnemyClusterSize String
     | WindowChanged ( Int, Int )
 
 

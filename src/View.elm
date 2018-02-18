@@ -2,6 +2,7 @@ module View exposing (view)
 
 import Color exposing (Color)
 import Common exposing (..)
+import Config
 import Ease
 import Game.TwoD as Game
 import Game.TwoD.Camera as Camera exposing (Camera)
@@ -95,7 +96,7 @@ renderCenteredWithAlias { time, size, camera } renderables =
 
 
 viewConfig : Config -> Html Msg
-viewConfig { isPaused, heroLength, heroThickness, enemySpeed, enemySpawnRate } =
+viewConfig { isPaused, heroLength, heroThickness, enemySpeed, enemySpawnRate, enemyClusterSize } =
     div [ class "config" ]
         [ h2 [] [ text "Config" ]
         , configCheckbox "Pause" isPaused TogglePause
@@ -103,6 +104,7 @@ viewConfig { isPaused, heroLength, heroThickness, enemySpeed, enemySpawnRate } =
         , configInput "Hero Thickness" heroThickness ChangeHeroThickness
         , configInput "Enemy Speed" enemySpeed ChangeEnemySpeed
         , configInput "Enemy Spawn/s Rate" enemySpawnRate ChangeEnemySpawnRate
+        , configInput "Enemy Cluster Size" enemyClusterSize ChangeEnemyClusterSize
         ]
 
 
