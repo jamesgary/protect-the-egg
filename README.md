@@ -49,6 +49,9 @@ Day 18
 - [x] Draw beach and ocean
 - [x] Bounce
 
+Day 22
+- [x] Bump the hero when colliding
+
 Next steps:
 - [ ] 
 

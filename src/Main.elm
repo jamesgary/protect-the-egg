@@ -336,12 +336,24 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos
             else
                 ( ( [], seed ), timeSinceLastSpawn )
 
-        movedEnemies =
+        ( movedEnemies, didCollide ) =
             enemies
                 |> List.append (spawnedEnemies |> List.concat)
                 |> List.map (moveEnemyCloserToEgg config timeDelta egg)
                 |> List.map (collideWithHero config curTime movedHero)
-                |> List.filter (isAlive config curTime)
+                |> (\listOfEnemiesAndDidCollide ->
+                        ( listOfEnemiesAndDidCollide
+                            |> List.map Tuple.first
+                            |> List.filter (isAlive config curTime)
+                        , List.any Tuple.second listOfEnemiesAndDidCollide
+                        )
+                   )
+
+        bumpedHero =
+            if didCollide then
+                bumpHero egg movedHero
+            else
+                movedHero
 
         isGameOver =
             List.any (doesCollideWithEgg egg) movedEnemies
@@ -355,7 +367,7 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos
         , curTime = curTime
         , timeSinceLastSpawn = newTimeSinceLastSpawn
         , seed = newSeed
-        , hero = movedHero
+        , hero = bumpedHero
     }
 
 
@@ -383,13 +395,12 @@ doesCollideWithEgg egg enemy =
             False
 
 
-collideWithHero : Config -> Time -> Hero -> Enemy -> Enemy
+collideWithHero : Config -> Time -> Hero -> Enemy -> ( Enemy, Bool )
 collideWithHero config curTime hero enemy =
     case enemy.state of
         Alive ->
             if isTouchingHero config hero enemy then
-                --{ enemy | state = Exploding (curTime + explosionLongevity) }
-                { enemy
+                ( { enemy
                     | state =
                         Bouncing
                             (V2.sub enemy.pos enemy.lastPos
@@ -401,21 +412,37 @@ collideWithHero config curTime hero enemy =
                                             + (hero.angle + turns 0.25)
                                    )
                             )
-
-                    --hero.angle
-                }
+                  }
+                , True
+                )
             else
-                enemy
+                ( enemy, False )
 
         Bouncing _ ->
-            enemy
+            ( enemy, False )
 
         Exploding _ ->
-            enemy
+            ( enemy, False )
 
 
 baseSpeed =
     0.02
+
+
+bumpHero : Egg -> Hero -> Hero
+bumpHero egg hero =
+    let
+        ( eggX, eggY ) =
+            V2.toTuple egg.pos
+
+        ( heroX, heroY ) =
+            V2.toTuple hero.pos
+    in
+    toPolar ( eggX - heroX, eggY - heroY )
+        |> (\( _, angle ) -> fromPolar ( 3, angle ))
+        |> (\( x, y ) ->
+                { hero | pos = V2.fromTuple ( heroX + x, heroY + y ) }
+           )
 
 
 moveEnemyCloserToEgg : Config -> Time -> Egg -> Enemy -> Enemy
