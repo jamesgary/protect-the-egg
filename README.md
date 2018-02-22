@@ -46,8 +46,8 @@ Day 14
 
 Day 18
 - [x] Configurable cluster size
-- [ ] Draw beach and ocean
-- [ ] Bounce
+- [x] Draw beach and ocean
+- [x] Bounce
 
 Next steps:
 - [ ] 
@@ -100,6 +100,53 @@ Everytime you destroy an enemy, your "egg meter" increases
 When it's full, you can lay an egg in your nest
 Slightly increases size of nest, but increases final score
 
+---
 
+Tablet stuff:
+- Draw start screen
+- Draw durdle
+  - Durdle eyes?
+  - Durdle waddling hands?
+- Draw quab
+  - Quab walk
+- Draw bg w/ egg nest
+- Draw an egg in these trying times
+- Victory screen
+- Failure screen (meet someone nice, lay eggs, and try again?)
 
+Computer stuff:
+- Make images renderables
+- Start screen button
+- Sidebar
+  - Pause/options
+  - Time until hatch
+  - Score
+  - # eggs left
+  - Kaiju meter
+- Onboarding (?)
+- Music (surf rock from FMA)
+- Sound
+  - Start game
+  - Crab greeting
+  - Crab death
+  - Durdle tummy hit
+  - Crab ate egg
+  - Pirate greeting
+  - Pirate shooting (aim, fire)
+  - Pirate death
+  - Game over
+  - Victory
+- Sequence enemies
+- Pirates
+  - Stands still, laser pointer aim
+  - Later: Rotates around island
+- Eye tracking (follows cursor, but don't go cross-eyed)
 
+Options:
+- Music
+- Sound
+- Graphics quality(?)
+- Always follow mouse or Right click to move
+
+Still to decide
+- How to onboard? Random dialogue boxes? Or Shelly Durdle speaking? From cursor, or aside?

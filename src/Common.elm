@@ -73,6 +73,7 @@ type alias Enemy =
 
 type EnemyState
     = Alive
+    | Bouncing Float
     | Exploding Time
 
 

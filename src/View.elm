@@ -372,6 +372,11 @@ viewEnemy curTime { pos, rad, state, seed } =
               viewCircle (Color.rgba 255 0 0 0.02) pos rad
             ]
 
+        Bouncing angle ->
+            [ viewCircle (Color.rgba 200 0 0 0.02) pos rad
+            , viewCircle (Color.rgba 255 200 200 0.02) pos (rad * 0.9)
+            ]
+
         Exploding expTime ->
             let
                 age =

@@ -365,17 +365,22 @@ isAlive config curTime enemy =
         Alive ->
             True
 
+        Bouncing _ ->
+            -- TODO check offscreen
+            True
+
         Exploding expTime ->
             expTime > curTime
 
 
 doesCollideWithEgg : Egg -> Enemy -> Bool
 doesCollideWithEgg egg enemy =
-    let
-        dist_ =
-            Math.dist egg.pos enemy.pos
-    in
-    dist_ < (egg.rad + enemy.rad)
+    case enemy.state of
+        Alive ->
+            Math.dist egg.pos enemy.pos < (egg.rad + enemy.rad)
+
+        _ ->
+            False
 
 
 collideWithHero : Config -> Time -> Hero -> Enemy -> Enemy
@@ -383,9 +388,27 @@ collideWithHero config curTime hero enemy =
     case enemy.state of
         Alive ->
             if isTouchingHero config hero enemy then
-                { enemy | state = Exploding (curTime + explosionLongevity) }
+                --{ enemy | state = Exploding (curTime + explosionLongevity) }
+                { enemy
+                    | state =
+                        Bouncing
+                            (V2.sub enemy.pos enemy.lastPos
+                                |> V2.negate
+                                |> V2.toTuple
+                                |> toPolar
+                                |> (\( r, a ) ->
+                                        ((hero.angle + turns 0.25) - a)
+                                            + (hero.angle + turns 0.25)
+                                   )
+                            )
+
+                    --hero.angle
+                }
             else
                 enemy
+
+        Bouncing _ ->
+            enemy
 
         Exploding _ ->
             enemy
@@ -414,6 +437,15 @@ moveEnemyCloserToEgg config timeDelta egg enemy =
                             , lastPos = enemy.pos
                         }
                    )
+
+        Bouncing angle ->
+            { enemy
+                | pos =
+                    fromPolar ( timeDelta * config.enemySpeed * baseSpeed, angle )
+                        |> V2.fromTuple
+                        |> V2.add enemy.pos
+                , lastPos = enemy.pos
+            }
 
         _ ->
             enemy
