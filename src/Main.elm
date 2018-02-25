@@ -265,7 +265,7 @@ moveHilt config timeDelta oldPos oldVel targetPos =
         ( newPos, newVelocity )
 
 
-moveHero : Time -> Model -> Hero
+moveHero : Time -> Model -> Model
 moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
     let
         ( eggX, eggY ) =
@@ -295,80 +295,132 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
                         |> (\( _, angle ) ->
                                 angle + turns 0.5
                            )
+
+        newHero =
+            { hero
+                | pos = heroPosFromHilt config { hero | angle = angle } newHiltPos
+                , lastPos = hero.pos
+                , vel = newVel
+                , angle = angle
+                , lastAngle = hero.angle
+            }
     in
-    { hero
-        | pos = heroPosFromHilt config { hero | angle = angle } newHiltPos
-        , lastPos = hero.pos
-        , vel = newVel
-        , angle = angle
-        , lastAngle = hero.angle
-    }
+    { model | hero = newHero }
 
 
 tick : Time -> Model -> Model
 tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos } as model) =
-    let
-        curTime =
-            model.curTime + timeDelta
+    model
+        |> updateCurTime timeDelta
+        |> moveHero timeDelta
+        |> spawnEnemies
+        |> moveEnemies timeDelta
+        |> collideHeroAndEnemies
+        |> removeDeadEnemies
+        |> checkGameOver
 
-        -- MOVE HERO
-        movedHero =
-            moveHero timeDelta model
 
-        -- SPAWN ENEMIES
-        timeToSpawn =
-            1000 / config.enemySpawnRate
+updateCurTime : Time -> Model -> Model
+updateCurTime timeDelta ({ curTime } as model) =
+    { model | curTime = curTime + timeDelta }
 
-        numEnemiesToSpawnFloat =
-            (curTime - timeSinceLastSpawn) / timeToSpawn
 
-        numEnemiesToSpawnInt =
-            floor numEnemiesToSpawnFloat
+spawnEnemies : Model -> Model
+spawnEnemies ({ enemies, qEnemies, curTime } as model) =
+    case qEnemies of
+        [] ->
+            model
 
-        timePassedSinceLastSpawn =
-            (numEnemiesToSpawnFloat - toFloat numEnemiesToSpawnInt) * timeToSpawn
-
-        ( ( spawnedEnemies, newSeed ), newTimeSinceLastSpawn ) =
-            if numEnemiesToSpawnInt >= 1 then
-                ( Random.step (Random.list numEnemiesToSpawnInt (clusterGenerator config)) seed
-                , curTime - timePassedSinceLastSpawn
-                )
+        ( timeToSpawn, enemy ) :: tail ->
+            if timeToSpawn <= curTime then
+                spawnEnemies
+                    { model
+                        | enemies = enemy :: enemies
+                        , qEnemies = tail
+                    }
             else
-                ( ( [], seed ), timeSinceLastSpawn )
+                model
 
-        ( movedEnemies, didCollide ) =
+
+moveEnemies : Time -> Model -> Model
+moveEnemies timeDelta ({ enemies, config, egg } as model) =
+    { model | enemies = List.map (moveEnemyCloserToEgg config timeDelta egg) enemies }
+
+
+collideHeroAndEnemies : Model -> Model
+collideHeroAndEnemies ({ config, egg, hero, enemies } as model) =
+    let
+        ( newEnemies, didCollide ) =
             enemies
-                |> List.append (spawnedEnemies |> List.concat)
-                |> List.map (moveEnemyCloserToEgg config timeDelta egg)
-                |> List.map (collideWithHero config curTime movedHero)
+                |> List.map (collideWithHero config hero)
                 |> (\listOfEnemiesAndDidCollide ->
                         ( listOfEnemiesAndDidCollide
                             |> List.map Tuple.first
-                            |> List.filter (isAlive config curTime)
                         , List.any Tuple.second listOfEnemiesAndDidCollide
                         )
                    )
 
-        bumpedHero =
+        newHero =
             if didCollide then
-                bumpHero egg movedHero
+                bumpHero egg hero
             else
-                movedHero
-
-        isGameOver =
-            List.any (doesCollideWithEgg egg) movedEnemies
-
-        -- FIXME
-        --|> always False
+                hero
     in
+    { model | enemies = newEnemies, hero = newHero }
+
+
+removeDeadEnemies : Model -> Model
+removeDeadEnemies ({ enemies, config, curTime } as model) =
+    { model | enemies = List.filter (isAlive config curTime) enemies }
+
+
+checkGameOver : Model -> Model
+checkGameOver ({ egg, enemies } as model) =
     { model
-        | enemies = movedEnemies
-        , isGameOver = isGameOver
-        , curTime = curTime
-        , timeSinceLastSpawn = newTimeSinceLastSpawn
-        , seed = newSeed
-        , hero = bumpedHero
+        | isGameOver =
+            List.any (doesCollideWithEgg egg) enemies
+
+        --|> always False
     }
+
+
+
+{- -- FOR ENDLESS MODE?
+
+   -- SPAWN ENEMIES
+   timeToSpawn =
+       1000 / config.enemySpawnRate
+
+   numEnemiesToSpawnFloat =
+       (curTime - timeSinceLastSpawn) / timeToSpawn
+
+   numEnemiesToSpawnInt =
+       floor numEnemiesToSpawnFloat
+
+   timePassedSinceLastSpawn =
+       (numEnemiesToSpawnFloat - toFloat numEnemiesToSpawnInt) * timeToSpawn
+
+   ( ( spawnedEnemies, newSeed ), newTimeSinceLastSpawn ) =
+       if numEnemiesToSpawnInt >= 1 then
+           ( Random.step (Random.list numEnemiesToSpawnInt (clusterGenerator config)) seed
+           , curTime - timePassedSinceLastSpawn
+           )
+       else
+           ( ( [], seed ), timeSinceLastSpawn )
+
+   ( movedEnemies, didCollide ) =
+       enemies
+           |> List.append (spawnedEnemies |> List.concat)
+           |> List.map (moveEnemyCloserToEgg config timeDelta egg)
+           |> List.map (collideWithHero config curTime movedHero)
+           |> (\listOfEnemiesAndDidCollide ->
+                   ( listOfEnemiesAndDidCollide
+                       |> List.map Tuple.first
+                       |> List.filter (isAlive config curTime)
+                   , List.any Tuple.second listOfEnemiesAndDidCollide
+                   )
+              )
+-}
 
 
 isAlive : Config -> Time -> Enemy -> Bool
@@ -395,8 +447,8 @@ doesCollideWithEgg egg enemy =
             False
 
 
-collideWithHero : Config -> Time -> Hero -> Enemy -> ( Enemy, Bool )
-collideWithHero config curTime hero enemy =
+collideWithHero : Config -> Hero -> Enemy -> ( Enemy, Bool )
+collideWithHero config hero enemy =
     case enemy.state of
         Alive ->
             if isTouchingHero config hero enemy then

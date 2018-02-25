@@ -20,6 +20,7 @@ type alias Model =
     , curTime : Time
     , config : Config
     , mousePos : Vec2
+    , qEnemies : List ( Time, Enemy ) -- queued enemies
     }
 
 

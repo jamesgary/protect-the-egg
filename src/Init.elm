@@ -3,6 +3,7 @@ module Init exposing (init)
 import Common exposing (..)
 import Math.Vector2 as V2 exposing (Vec2)
 import Random
+import Time exposing (Time)
 
 
 startingPos =
@@ -41,17 +42,39 @@ init { cameraWidth, cameraHeight, timestamp } =
       , timeSinceLastSpawn = 0
       , curTime = 0
       , config =
-            { isPaused = True
-            , heroLength = 40 --20
-            , heroThickness = 6 --3
+            { isPaused = False
+            , heroLength = 20
+            , heroThickness = 5
             , enemySpeed = 1
             , enemySpawnRate = 0.5
             , enemyClusterSize = 3
             }
+      , qEnemies = initQueuedEnemies ( cameraWidth, cameraHeight ) seed
       , mousePos = startingPos
       }
     , Cmd.none
     )
+
+
+initQueuedEnemies : ( Int, Int ) -> Random.Seed -> List ( Time, Enemy )
+initQueuedEnemies ( cameraWidth, cameraHeight ) seed =
+    [ ( 1000
+      , { pos = V2.fromTuple ( 50, 50 )
+        , lastPos = V2.fromTuple ( 50, 50 )
+        , rad = 2
+        , state = Alive
+        , seed = seed
+        }
+      )
+    , ( 2000
+      , { pos = V2.fromTuple ( 80, 20 )
+        , lastPos = V2.fromTuple ( 80, 20 )
+        , rad = 2
+        , state = Alive
+        , seed = seed
+        }
+      )
+    ]
 
 
 initEnemies : ( Int, Int ) -> Random.Seed -> ( List Enemy, Random.Seed )

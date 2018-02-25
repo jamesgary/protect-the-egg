@@ -54,6 +54,7 @@ Day 22
 
 Day 25
 - [x] Sidebar (basic)
+- [ ] Enemy sequencing
 
 Next steps:
 - [ ] 
