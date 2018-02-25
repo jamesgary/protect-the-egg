@@ -4,10 +4,11 @@ import Color exposing (Color)
 import Common exposing (..)
 import Config
 import Ease
+import ElementRelativeMouseEvents as Mouse
 import Game.TwoD as Game
 import Game.TwoD.Camera as Camera exposing (Camera)
 import Game.TwoD.Render as Render exposing (Renderable, circle, customFragment, rectangle, ring)
-import Html exposing (Html, div, h1, h2, input, label, text)
+import Html exposing (Html, br, dd, div, dl, dt, h1, h2, input, label, p, span, table, td, text, tr)
 import Html.Attributes exposing (checked, class, defaultValue, style, type_)
 import Html.Events exposing (onClick, onInput)
 import Math.Vector2 as V2 exposing (Vec2)
@@ -36,35 +37,71 @@ colors =
 view : Model -> Html Msg
 view ({ egg, hero, enemies, config, curTime, isGameOver, cameraWidth, cameraHeight } as model) =
     div [ class "container" ]
-        [ renderCenteredWithAlias
-            { time = 0
-            , camera = camera
-            , size =
-                let
-                    w =
-                        toFloat cameraWidth
+        [ div [ class "game-container" ]
+            [ renderSidebar model
+            , renderCenteredWithAlias
+                { time = 0
+                , camera = camera
+                , size =
+                    let
+                        w =
+                            toFloat cameraWidth
 
-                    h =
-                        toFloat cameraHeight
-                in
-                (if w / h > 16 / 9 then
-                    -- too wide!
-                    ( h * (16 / 9), h )
-                 else
-                    -- too tall!
-                    ( w, w * (9 / 16) )
+                        h =
+                            toFloat cameraHeight
+                    in
+                    (if w > h then
+                        -- too wide!
+                        ( h, h )
+                     else
+                        -- too tall!
+                        ( w, w )
+                    )
+                        |> (\( w, h ) -> ( round <| w, round <| h ))
+                }
+                (List.concat
+                    [ viewBg model
+                    , viewEgg egg
+                    , viewHero config hero
+                    , List.concat (List.map (viewEnemy curTime) enemies)
+                    ]
                 )
-                    |> (\( w, h ) -> ( round <| w, round <| h ))
-            }
-            (List.concat
-                [ viewBg model
-                , viewEgg egg
-                , viewHero config hero
-                , List.concat (List.map (viewEnemy curTime) enemies)
-                ]
-            )
+            ]
         , viewGameOver isGameOver
-        , viewConfig config
+
+        --, viewConfig config
+        ]
+
+
+renderSidebar : Model -> Html Msg
+renderSidebar model =
+    div [ class "sidebar" ]
+        [ div [ class "pause-btn", onClick TogglePause ]
+            [ text
+                (if model.config.isPaused then
+                    "Unpause"
+                 else
+                    "Pause"
+                )
+            ]
+        , table [ class "sidebar-list" ]
+            [ tr [ class "group" ]
+                [ td [ class "label" ] [ text "Time until hatch:" ]
+                , td [ class "val" ] [ text "4:20" ]
+                ]
+            , tr [ class "group" ]
+                [ td [ class "label" ] [ text "Score" ]
+                , td [ class "val" ] [ text "123" ]
+                ]
+            , tr [ class "group" ]
+                [ td [ class "label" ] [ text "Eggs left" ]
+                , td [ class "val" ] [ text "12" ]
+                ]
+            , tr [ class "group" ]
+                [ td [ class "label" ] [ text "Kaiju Meter" ]
+                , td [ class "val" ] [ text "82/100" ]
+                ]
+            ]
         ]
 
 
@@ -77,25 +114,17 @@ renderCenteredWithAlias { time, size, camera } renderables =
         ( wf, hf ) =
             ( toFloat w, toFloat h )
     in
-    div
-        [ style
-            [ ( "width", "100%" )
-            , ( "height", "100%" )
-            , ( "display", "flex" )
-            , ( "align-items", "center" )
-            , ( "justify-content", "center" )
-            ]
+    WebGL.toHtmlWith
+        [ WebGL.alpha True
+        , WebGL.depth 1
+        , WebGL.antialias
         ]
-        [ WebGL.toHtmlWith
-            [ WebGL.alpha True
-            , WebGL.depth 1
-            , WebGL.antialias
-            ]
-            [ Html.Attributes.width w
-            , Html.Attributes.height h
-            ]
-            (List.map (Render.toWebGl time camera ( wf, hf )) renderables)
+        [ Html.Attributes.width w
+        , Html.Attributes.height h
+        , Mouse.onMouseMove MouseMove
+        , Mouse.onClick MouseClick
         ]
+        (List.map (Render.toWebGl time camera ( wf, hf )) renderables)
 
 
 viewConfig : Config -> Html Msg

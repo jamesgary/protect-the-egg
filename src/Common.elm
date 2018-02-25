@@ -1,5 +1,6 @@
 module Common exposing (..)
 
+import ElementRelativeMouseEvents as Mouse
 import Game.TwoD.Camera as Camera exposing (Camera)
 import Math.Vector2 as V2 exposing (Vec2)
 import Mouse
@@ -87,8 +88,8 @@ explosionLongevity =
 
 
 type Msg
-    = MouseMove Mouse.Position
-    | MouseClick Mouse.Position
+    = MouseMove Mouse.Point
+    | MouseClick Mouse.Point
     | Tick Time
     | TogglePause
     | ChangeHeroLength String
@@ -149,4 +150,5 @@ trueThickness { heroThickness } { thickness } =
 
 
 camera =
-    Camera.fixedHeight (16 * 9) ( 0, 0 )
+    --Camera.fixedHeight (16 * 9) ( 0, 0 )
+    Camera.fixedHeight (12 * 12) ( 0, 0 )

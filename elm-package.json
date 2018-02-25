@@ -8,6 +8,7 @@
     ],
     "exposed-modules": [],
     "dependencies": {
+        "Elm-Canvas/element-relative-mouse-events": "1.0.0 <= v < 2.0.0",
         "Zinggi/elm-2d-game": "3.1.0 <= v < 4.0.0",
         "elm-community/easing-functions": "1.0.2 <= v < 2.0.0",
         "elm-community/linear-algebra": "3.1.1 <= v < 4.0.0",

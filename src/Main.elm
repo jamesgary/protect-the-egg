@@ -2,12 +2,12 @@ module Main exposing (..)
 
 import AnimationFrame
 import Common exposing (..)
+import ElementRelativeMouseEvents as Mouse
 import Game.TwoD.Camera exposing (viewportToGameCoordinates)
 import Html
 import Init exposing (init)
 import Math
 import Math.Vector2 as V2 exposing (Vec2)
-import Mouse
 import Ports exposing (windowChanged)
 import Random
 import Time exposing (Time)
@@ -166,7 +166,7 @@ update msg ({ cameraWidth, cameraHeight, hero, config } as model) =
             { model | config = newConfig } ! []
 
 
-trueMousePos : Model -> Mouse.Position -> Vec2
+trueMousePos : Model -> Mouse.Point -> Vec2
 trueMousePos { cameraWidth, cameraHeight } { x, y } =
     let
         w =
@@ -176,18 +176,18 @@ trueMousePos { cameraWidth, cameraHeight } { x, y } =
             toFloat cameraHeight
 
         ( innerWidth, innerHeight, xOffset, yOffset ) =
-            if w / h > 16 / 9 then
+            if w - h > 0 then
                 -- too wide!
-                ( h * (16 / 9), h, w - (h * 16 / 9), 0 )
+                ( h, h, w - h, 0 )
             else
                 -- too tall!
-                ( w, w * (9 / 16), 0, h - (w * (9 / 16)) )
+                ( w, w, 0, h - w )
     in
     viewportToGameCoordinates
         camera
         ( innerWidth |> round, innerHeight |> round )
-        ( round <| toFloat x - 0.5 * xOffset
-        , round <| toFloat y - 0.5 * yOffset
+        ( round <| x
+        , round <| y
         )
         |> (\( gameX, gameY ) ->
                 V2.fromTuple ( gameX, gameY )
@@ -485,9 +485,7 @@ moveEnemyCloserToEgg config timeDelta egg enemy =
 subscriptions : Model -> Sub Msg
 subscriptions ({ isGameOver, config } as model) =
     Sub.batch
-        [ Mouse.moves MouseMove
-        , Mouse.clicks MouseClick
-        , windowChanged WindowChanged
+        [ windowChanged WindowChanged
         , if isGameOver || config.isPaused then
             Sub.none
           else

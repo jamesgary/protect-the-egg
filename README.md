@@ -52,6 +52,9 @@ Day 18
 Day 22
 - [x] Bump the hero when colliding
 
+Day 25
+- [x] Sidebar (basic)
+
 Next steps:
 - [ ] 
 
