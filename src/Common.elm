@@ -18,6 +18,7 @@ type alias Model =
     , seed : Random.Seed
     , timeSinceLastSpawn : Time
     , curTime : Time
+    , timeUntilHatch : Time
     , config : Config
     , mousePos : Vec2
     , qEnemies : List ( Time, Enemy ) -- queued enemies

@@ -41,6 +41,7 @@ init { cameraWidth, cameraHeight, timestamp } =
       , seed = newSeed
       , timeSinceLastSpawn = 0
       , curTime = 0
+      , timeUntilHatch = 2 * 60 * 1000 -- TWO MINUTES TO MIIIIIDNIIIIGHT
       , config =
             { isPaused = False
             , heroLength = 20

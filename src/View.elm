@@ -87,7 +87,7 @@ renderSidebar model =
         , table [ class "sidebar-list" ]
             [ tr [ class "group" ]
                 [ td [ class "label" ] [ text "Time until hatch:" ]
-                , td [ class "val" ] [ text "4:20" ]
+                , td [ class "val" ] [ text (viewTime (model.timeUntilHatch - model.curTime)) ]
                 ]
             , tr [ class "group" ]
                 [ td [ class "label" ] [ text "Score" ]
@@ -103,6 +103,27 @@ renderSidebar model =
                 ]
             ]
         ]
+
+
+viewTime : Time -> String
+viewTime time =
+    let
+        minutes =
+            time |> Time.inMinutes |> floor
+
+        seconds =
+            (time |> Time.inSeconds) - (toFloat minutes * 60) |> floor
+
+        minutesStr =
+            minutes |> toString
+
+        secondsStr =
+            if seconds < 10 then
+                "0" ++ (seconds |> toString)
+            else
+                seconds |> toString
+    in
+    minutesStr ++ ":" ++ secondsStr
 
 
 renderCenteredWithAlias : Game.RenderConfig -> List Renderable -> Html Msg
