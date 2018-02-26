@@ -58,23 +58,92 @@ init { cameraWidth, cameraHeight, timestamp } =
 
 initQueuedEnemies : ( Int, Int ) -> Random.Seed -> List ( Time, Enemy )
 initQueuedEnemies ( cameraWidth, cameraHeight ) seed =
-    [ ( 1000
-      , { pos = V2.fromTuple ( 50, 50 )
-        , lastPos = V2.fromTuple ( 50, 50 )
-        , rad = 2
-        , state = Alive
-        , seed = seed
-        }
-      )
-    , ( 2000
-      , { pos = V2.fromTuple ( 80, 20 )
-        , lastPos = V2.fromTuple ( 80, 20 )
-        , rad = 2
-        , state = Alive
-        , seed = seed
-        }
-      )
+    let
+        wave1Time =
+            0
+
+        wave2Time =
+            5000
+
+        wave3Time =
+            10000
+
+        wave4Time =
+            15000
+
+        wave5Time =
+            25000
+
+        twelvth =
+            turns (1 / 12)
+
+        top =
+            turns 0.25
+
+        bottom =
+            turns -0.25
+    in
+    -- initCluster seed timeToSpawn numEnemies angle
+    [ -- wave 1, single quabs from top
+      initCluster seed (wave1Time + 0) 1 (top + twelvth)
+    , initCluster seed (wave1Time + 1000) 1 top
+    , initCluster seed (wave1Time + 2000) 1 (top - twelvth)
+
+    -- wave 2, single quabs from bottom
+    , initCluster seed (wave2Time + 0) 1 (bottom - twelvth)
+    , initCluster seed (wave2Time + 1000) 1 bottom
+    , initCluster seed (wave2Time + 2000) 1 (bottom + twelvth)
+
+    -- wave 3, clusters from the left/right sides
+    , initCluster seed (wave3Time + 0) 3 (turns 0.5)
+    , initCluster seed (wave3Time + 3000) 3 (turns 0)
+
+    -- wave 4, clusters from all around!
+    , List.range 0 12
+        |> List.map
+            (\i ->
+                initCluster seed (wave4Time + (2000 * toFloat i)) 5 (top - (toFloat i * turns (1 / 12)))
+            )
+        |> List.concat
+
+    -- wave 5, singles spiraling in from all around!
+    , List.range 0 48
+        |> List.map
+            (\i ->
+                initCluster seed (wave5Time + (100 * toFloat i)) 1 (top - (toFloat i * turns (1 / 48)))
+            )
+        |> List.concat
     ]
+        |> List.concat
+        |> List.sortBy Tuple.first
+
+
+initCluster : Random.Seed -> Time -> Int -> Float -> List ( Time, Enemy )
+initCluster seed timeToSpawn numEnemies angle =
+    List.range 1 numEnemies
+        |> List.map
+            (\i ->
+                let
+                    timeBetween =
+                        600
+
+                    distFromEggToSpawn =
+                        60
+
+                    pos =
+                        ( distFromEggToSpawn, angle )
+                            |> fromPolar
+                            |> V2.fromTuple
+                in
+                ( timeToSpawn + (timeBetween * toFloat i)
+                , { pos = pos
+                  , lastPos = pos
+                  , rad = 2
+                  , state = Alive
+                  , seed = seed
+                  }
+                )
+            )
 
 
 initEnemies : ( Int, Int ) -> Random.Seed -> ( List Enemy, Random.Seed )

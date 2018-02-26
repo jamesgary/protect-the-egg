@@ -73,10 +73,6 @@ clusterGenerator { enemyClusterSize } =
             )
 
 
-
--- UPDATE
-
-
 toggleState : Hero -> Hero
 toggleState hero =
     case hero.state of
@@ -478,7 +474,7 @@ collideWithHero config hero enemy =
 
 
 baseSpeed =
-    0.02
+    0.01
 
 
 bumpHero : Egg -> Hero -> Hero
