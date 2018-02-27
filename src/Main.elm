@@ -3,6 +3,7 @@ module Main exposing (..)
 import AnimationFrame
 import Common exposing (..)
 import ElementRelativeMouseEvents as Mouse
+import Game.Resources as Resources exposing (Resources)
 import Game.TwoD.Camera exposing (viewportToGameCoordinates)
 import Html
 import Init exposing (init)
@@ -84,7 +85,7 @@ toggleState hero =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ cameraWidth, cameraHeight, hero, config } as model) =
+update msg ({ viewportWidth, viewportHeight, hero, config } as model) =
     case msg of
         MouseClick mousePos ->
             { model | hero = toggleState hero |> (\hero -> { hero | pos = trueMousePos model mousePos }) } ! []
@@ -97,7 +98,17 @@ update msg ({ cameraWidth, cameraHeight, hero, config } as model) =
             tick (min timeDelta 33) model ! []
 
         WindowChanged ( width, height ) ->
-            { model | cameraWidth = width, cameraHeight = height } ! []
+            let
+                ( canvasSize, sidebarWidth ) =
+                    getDims viewportWidth viewportHeight
+            in
+            { model
+                | viewportWidth = width
+                , viewportHeight = height
+                , canvasSize = canvasSize
+                , sidebarWidth = sidebarWidth
+            }
+                ! []
 
         TogglePause ->
             let
@@ -161,15 +172,18 @@ update msg ({ cameraWidth, cameraHeight, hero, config } as model) =
             in
             { model | config = newConfig } ! []
 
+        Resources msg ->
+            { model | resources = Resources.update msg model.resources } ! []
+
 
 trueMousePos : Model -> Mouse.Point -> Vec2
-trueMousePos { cameraWidth, cameraHeight } { x, y } =
+trueMousePos { viewportWidth, viewportHeight } { x, y } =
     let
         w =
-            toFloat cameraWidth
+            toFloat viewportWidth
 
         h =
-            toFloat cameraHeight
+            toFloat viewportHeight
 
         ( innerWidth, innerHeight, xOffset, yOffset ) =
             if w - h > 0 then
@@ -344,11 +358,11 @@ moveEnemies timeDelta ({ enemies, config, egg } as model) =
 
 
 collideHeroAndEnemies : Model -> Model
-collideHeroAndEnemies ({ config, egg, hero, enemies } as model) =
+collideHeroAndEnemies ({ config, egg, hero, enemies, curTime } as model) =
     let
         ( newEnemies, didCollide ) =
             enemies
-                |> List.map (collideWithHero config hero)
+                |> List.map (collideWithHero config curTime hero)
                 |> (\listOfEnemiesAndDidCollide ->
                         ( listOfEnemiesAndDidCollide
                             |> List.map Tuple.first
@@ -443,23 +457,26 @@ doesCollideWithEgg egg enemy =
             False
 
 
-collideWithHero : Config -> Hero -> Enemy -> ( Enemy, Bool )
-collideWithHero config hero enemy =
+collideWithHero : Config -> Time -> Hero -> Enemy -> ( Enemy, Bool )
+collideWithHero config curTime hero enemy =
     case enemy.state of
         Alive ->
             if isTouchingHero config hero enemy then
                 ( { enemy
                     | state =
-                        Bouncing
-                            (V2.sub enemy.pos enemy.lastPos
-                                |> V2.negate
-                                |> V2.toTuple
-                                |> toPolar
-                                |> (\( r, a ) ->
-                                        ((hero.angle + turns 0.25) - a)
-                                            + (hero.angle + turns 0.25)
-                                   )
-                            )
+                        if True then
+                            Exploding (curTime + explosionLongevity)
+                        else
+                            Bouncing
+                                (V2.sub enemy.pos enemy.lastPos
+                                    |> V2.negate
+                                    |> V2.toTuple
+                                    |> toPolar
+                                    |> (\( r, a ) ->
+                                            ((hero.angle + turns 0.25) - a)
+                                                + (hero.angle + turns 0.25)
+                                       )
+                                )
                   }
                 , True
                 )

@@ -54,10 +54,13 @@ Day 22
 
 Day 25
 - [x] Sidebar (basic)
-- [ ] Enemy sequencing
+- [x] Enemy sequencing
+
+Day 26
+- [x] Art!
 
 Next steps:
-- [ ] 
+- [ ] C-C-C-COMBOS
 
 Future steps:
 - [ ] Juice!
@@ -157,3 +160,7 @@ Options:
 
 Still to decide
 - How to onboard? Random dialogue boxes? Or Shelly Durdle speaking? From cursor, or aside?
+
+Maybe level progression:
+- Just crabs, different colors, intro to kaiju, bg is all sand
+- Zoom out, see shore, introduce pirates

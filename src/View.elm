@@ -1,10 +1,12 @@
 module View exposing (view)
 
+import Array
 import Color exposing (Color)
 import Common exposing (..)
 import Config
 import Ease
 import ElementRelativeMouseEvents as Mouse
+import Game.Resources as Resources exposing (Resources)
 import Game.TwoD as Game
 import Game.TwoD.Camera as Camera exposing (Camera)
 import Game.TwoD.Render as Render exposing (Renderable, circle, customFragment, rectangle, ring)
@@ -35,37 +37,26 @@ colors =
 
 
 view : Model -> Html Msg
-view ({ egg, hero, enemies, config, curTime, isGameOver, cameraWidth, cameraHeight } as model) =
+view ({ egg, hero, enemies, config, curTime, isGameOver, canvasSize, resources } as model) =
     div [ class "container" ]
         [ div [ class "game-container" ]
             [ renderSidebar model
-            , renderCenteredWithAlias
-                { time = 0
-                , camera = camera
-                , size =
-                    let
-                        w =
-                            toFloat cameraWidth
-
-                        h =
-                            toFloat cameraHeight
-                    in
-                    (if w > h then
-                        -- too wide!
-                        ( h, h )
-                     else
-                        -- too tall!
-                        ( w, w )
+            , div [ class "canvas-container" ]
+                [ renderCenteredWithAlias
+                    { time = curTime
+                    , camera = camera
+                    , size = ( canvasSize, canvasSize )
+                    }
+                    (List.concat
+                        [ --viewBg model
+                          viewEgg egg
+                        , viewHero config hero
+                        , List.concat (List.map (viewEnemy resources curTime) enemies)
+                        ]
                     )
-                        |> (\( w, h ) -> ( round <| w, round <| h ))
-                }
-                (List.concat
-                    [ viewBg model
-                    , viewEgg egg
-                    , viewHero config hero
-                    , List.concat (List.map (viewEnemy curTime) enemies)
-                    ]
-                )
+
+                --, renderTextEffects model
+                ]
             ]
         , viewGameOver isGameOver
 
@@ -73,9 +64,16 @@ view ({ egg, hero, enemies, config, curTime, isGameOver, cameraWidth, cameraHeig
         ]
 
 
+renderTextEffects : Model -> Html Msg
+renderTextEffects ({ enemies } as model) =
+    div [ class "text-effects-container" ]
+        [ div [ class "text-effect" ] [ text "+1" ]
+        ]
+
+
 renderSidebar : Model -> Html Msg
 renderSidebar model =
-    div [ class "sidebar" ]
+    div [ class "sidebar", style [ ( "width", px model.sidebarWidth ) ] ]
         [ div [ class "pause-btn", onClick TogglePause ]
             [ text
                 (if model.config.isPaused then
@@ -191,19 +189,19 @@ configInput title val msg =
 
 
 viewBg : Model -> List Renderable
-viewBg { cameraWidth, cameraHeight } =
+viewBg { viewportWidth, viewportHeight } =
     [ viewShape colors.oceanBlue
         (Rect
             { pos = V2.fromTuple ( 0, 0 )
-            , width = toFloat cameraWidth
-            , height = toFloat cameraHeight
+            , width = toFloat viewportWidth
+            , height = toFloat viewportHeight
             , angle = 0
             }
         )
     , viewShape colors.beachBg
         (Circle
             { pos = V2.fromTuple ( 0, 0 )
-            , rad = 0.07 * toFloat cameraHeight -- wat
+            , rad = 0.07 * toFloat viewportHeight -- wat
             }
         )
     ]
@@ -414,12 +412,46 @@ viewShape color shape =
                 }
 
 
-viewEnemy : Time -> Enemy -> List Renderable
-viewEnemy curTime { pos, rad, state, seed } =
+viewEnemy : Resources -> Time -> Enemy -> List Renderable
+viewEnemy resources curTime { pos, rad, state, seed } =
     case state of
         Alive ->
             [ --viewCircle Color.black pos (rad + eggBorder),
-              viewCircle (Color.rgba 255 0 0 0.02) pos rad
+              --viewCircle (Color.rgba 255 0 0 0.02) pos rad
+              let
+                ( x, y ) =
+                    pos |> V2.toTuple
+
+                ( frameToShow, isFlipped ) =
+                    [ ( 1, False )
+                    , ( 2, False )
+                    , ( 3, False )
+                    , ( 2, False )
+                    , ( 0, True )
+                    , ( 2, True )
+                    , ( 3, True )
+                    , ( 2, True )
+                    ]
+                        |> Array.fromList
+                        |> Array.get ((curTime / 140 |> round) % 8)
+                        |> Maybe.withDefault ( 0, True )
+              in
+              Render.manuallyManagedAnimatedSpriteWithOptions
+                { position = ( x, y, 0 )
+                , size =
+                    if isFlipped then
+                        ( -11, 11 )
+                    else
+                        ( 11, 11 )
+                , texture = Resources.getTexture "images/crab-spritesheet.png" resources
+                , bottomLeft = ( 0, 0 )
+                , topRight = ( 1, 1 )
+                , duration = 300
+                , numberOfFrames = 4
+                , rotation = pos |> V2.toTuple |> toPolar |> Tuple.second |> (+) (turns 0.25)
+                , pivot = ( 0.5, 0.5 )
+                , currentFrame = frameToShow
+                }
             ]
 
         Bouncing angle ->

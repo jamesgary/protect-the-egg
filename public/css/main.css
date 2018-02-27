@@ -114,6 +114,25 @@ canvas {
   width: 50px;
 }
 
+/* TEXT EFFECTS */
+
+.canvas-container {
+  background: url('../images/bg.png');
+  background-size: 100%;
+}
+
+.text-effects-container {
+  position: absolute;
+  top: 0; left: 0;
+}
+
+.text-effect {
+  font-size: 18px;
+  color: white;
+  text-shadow: 0 0 1px rgba(0,0,0,0.9);
+  font-weight: bold;
+}
+
 /* TESTING */
 
 canvas {
