@@ -10,8 +10,8 @@ import Game.Resources as Resources exposing (Resources)
 import Game.TwoD as Game
 import Game.TwoD.Camera as Camera exposing (Camera)
 import Game.TwoD.Render as Render exposing (Renderable, circle, customFragment, rectangle, ring)
-import Html exposing (Html, br, dd, div, dl, dt, h1, h2, img, input, label, p, span, table, td, text, tr)
-import Html.Attributes exposing (checked, class, defaultValue, src, style, type_, value)
+import Html exposing (Html, a, br, dd, div, dl, dt, h1, h2, img, input, label, p, span, table, td, text, tr)
+import Html.Attributes exposing (checked, class, defaultValue, href, src, style, target, type_, value)
 import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
 import Math.Vector2 as V2 exposing (Vec2)
 import Random
@@ -65,6 +65,34 @@ view ({ egg, hero, enemies, config, curTime, isGameOver, canvasSize, resources, 
                         , onClick StartGame
                         ]
                         []
+                    , div
+                        [ class "credits credits-left"
+                        ]
+                        [ div [ class "credits-group" ]
+                            [ text "Created by"
+                            , br [] []
+                            , a [ href "https://twitter.com/james_gary", target "_blank" ] [ text "@james_gary" ]
+                            ]
+                        , div [ class "credits-group" ]
+                            [ text "Source Code on"
+                            , br [] []
+                            , a [ href "https://github.com/jamesgary/protect-the-egg", target "_blank" ] [ text "github.com" ]
+                            ]
+                        ]
+                    , div
+                        [ class "credits credits-right"
+                        ]
+                        [ div [ class "credits-group" ]
+                            [ text "Music by"
+                            , br [] []
+                            , a [ href "http://freemusicarchive.org/music/Pharaos/The_New_Pharaos/03_The_Pharaos_Theme_vbrmp3_1375", target "_blank" ] [ text "Pharaos" ]
+                            ]
+                        , div [ class "credits-group" ]
+                            [ text "Sound"
+                            , br [] []
+                            , a [ href "https://www.bfxr.net/", target "_blank" ] [ text "Bfxr" ]
+                            ]
+                        ]
                     ]
                 ]
 

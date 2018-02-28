@@ -9,6 +9,7 @@ html, body {
   height: 100%;
   margin: 0;
   font-family: 'Catamaran', sans-serif;
+  font-size: 1vmin;
 }
 
 .container {
@@ -52,6 +53,47 @@ html, body {
 
 .start-container.is-hovered .start-screen-img { opacity: 0.01; }
 .start-container.is-hovered .start-screen-on-img { opacity: 1; }
+
+.credits {
+  font-size: 5rem;
+  color: rgb(230, 255, 255);
+  text-shadow:
+    0 0 1px rgba(0,0,0,0.95),
+    0 0 2px rgba(0,0,0,0.95),
+    -1px 1px 1px rgba(0,0,0,0.95),
+    -1px 1px 2px rgba(0,0,0,0.95);
+
+  position: absolute;
+  top: 11%;
+  width: 27%;
+}
+
+.credits-group {
+  background: rgba(255, 255, 255, 0.6);
+  padding: 2vmin;
+  text-align: center;
+  margin-bottom: 9vmin;
+  border: 0.3vmin solid rgba(255, 255, 255, 0.9);
+  border-radius: 2vmin;
+}
+
+.credits-left {
+  left: 4%;
+}
+
+.credits-right {
+  right: 4%;
+}
+
+a {
+  color: rgb(150, 255, 235);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
 
 /* PLAYING SCREEN */
 
