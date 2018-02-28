@@ -378,20 +378,22 @@ moveEnemies timeDelta ({ enemies, config, egg } as model) =
 
 
 collideHeroAndEnemies : Model -> Model
-collideHeroAndEnemies ({ config, egg, hero, enemies, curTime, cmds } as model) =
+collideHeroAndEnemies ({ config, egg, hero, enemies, curTime, kaiju, cmds } as model) =
     let
-        ( newEnemies, didCollide ) =
+        ( newEnemies, numCollidedEnemies ) =
             enemies
                 |> List.map (collideWithHero config curTime hero)
                 |> (\listOfEnemiesAndDidCollide ->
                         ( listOfEnemiesAndDidCollide
                             |> List.map Tuple.first
-                        , List.any Tuple.second listOfEnemiesAndDidCollide
+                        , listOfEnemiesAndDidCollide
+                            |> List.filter Tuple.second
+                            |> List.length
                         )
                    )
 
         newHero =
-            if didCollide then
+            if numCollidedEnemies > 0 then
                 bumpHero egg hero
             else
                 hero
@@ -399,8 +401,9 @@ collideHeroAndEnemies ({ config, egg, hero, enemies, curTime, cmds } as model) =
     { model
         | enemies = newEnemies
         , hero = newHero
+        , kaiju = kaiju + numCollidedEnemies
         , cmds =
-            if didCollide then
+            if numCollidedEnemies > 0 then
                 playWav "crab-death" :: cmds
             else
                 cmds

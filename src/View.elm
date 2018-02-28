@@ -72,11 +72,11 @@ renderTextEffects ({ enemies } as model) =
 
 
 renderSidebar : Model -> Html Msg
-renderSidebar model =
-    div [ class "sidebar", style [ ( "width", px model.sidebarWidth ) ] ]
+renderSidebar ({ sidebarWidth, timeUntilHatch, curTime, kaiju, config } as model) =
+    div [ class "sidebar", style [ ( "width", px sidebarWidth ) ] ]
         [ div [ class "pause-btn", onClick TogglePause ]
             [ text
-                (if model.config.isPaused then
+                (if config.isPaused then
                     "Unpause"
                  else
                     "Pause"
@@ -85,7 +85,7 @@ renderSidebar model =
         , table [ class "sidebar-list" ]
             [ tr [ class "group" ]
                 [ td [ class "label" ] [ text "Time until hatch:" ]
-                , td [ class "val" ] [ text (viewTime (model.timeUntilHatch - model.curTime)) ]
+                , td [ class "val" ] [ text (viewTime (timeUntilHatch - curTime)) ]
                 ]
             , tr [ class "group" ]
                 [ td [ class "label" ] [ text "Score" ]
@@ -97,7 +97,7 @@ renderSidebar model =
                 ]
             , tr [ class "group" ]
                 [ td [ class "label" ] [ text "Kaiju Meter" ]
-                , td [ class "val" ] [ text "82/1OO" ]
+                , td [ class "val" ] [ formatNum kaiju ++ "/1OO" |> text ]
                 ]
             ]
         ]
@@ -117,7 +117,7 @@ viewTime time =
 
         secondsStr =
             if seconds < 10 then
-                "0" ++ (seconds |> formatNum)
+                "O" ++ (seconds |> formatNum)
             else
                 seconds |> formatNum
     in

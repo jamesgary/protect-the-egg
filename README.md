@@ -62,6 +62,8 @@ Day 26
 
 Day 27
 - [x] Durdle goes around nest
+- [x] Durdle stays on the beach
+- [x] Increase kaiju after quab hit
 - [ ] Start Screen
 - [ ] Onboarding/Tutorial
 - [ ] Victory
@@ -178,3 +180,8 @@ Still to decide
 Maybe level progression:
 - Just crabs, different colors, intro to kaiju, bg is all sand
 - Zoom out, see shore, introduce pirates
+
+Quabs are chomping at the bit for your eggs!
+Smash them away with your shell!
+The more quabs you smash, the more your Kaiju meter increases!
+Click to unleash your Kaiju rage!

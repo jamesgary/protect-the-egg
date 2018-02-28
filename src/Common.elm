@@ -27,6 +27,7 @@ type alias Model =
     , qEnemies : List ( Time, Enemy ) -- queued enemies
     , resources : Resources
     , cmds : List (Cmd Msg)
+    , kaiju : Int
     }
 
 

@@ -60,6 +60,7 @@ init { viewportWidth, viewportHeight, timestamp } =
     , mousePos = startingPos
     , resources = Resources.init
     , cmds = []
+    , kaiju = 0
     }
         ! [ Resources.loadTextures [ "images/crab-spritesheet.png" ]
                 |> Cmd.map Resources
