@@ -61,16 +61,15 @@ Day 26
 - [x] Sound!
 
 Day 27
+- [x] Durdle goes around nest
 - [ ] Start Screen
 - [ ] Onboarding/Tutorial
 - [ ] Victory
 - [ ] Music
 - [ ] Better game over (restart)
 
-Next steps:
-- [ ] C-C-C-COMBOS
-
 Future steps:
+- [ ] C-C-C-COMBOS
 - [ ] Juice!
 - [ ] Actual Level
 - [ ] Benchmark
@@ -129,14 +128,18 @@ Tablet stuff:
   - Durdle eyes?
   - Durdle waddling hands?
 - Draw quab
-  - Quab walk
-- Draw bg w/ egg nest
+  - Quab walk (DONE)
+  - Quab eating egg
+  - Quab exploding
+- Draw bg w/ egg nest (DONE)
 - Draw an egg in these trying times
+  - Egg getting eaten
 - Victory screen
+  - Eggs hatch
+  - Baby durdles express gratitude
 - Failure screen (meet someone nice, lay eggs, and try again?)
 
 Computer stuff:
-- Make images renderables
 - Start screen button
 - Sidebar
   - Pause/options

@@ -275,12 +275,13 @@ moveHilt config timeDelta oldPos oldVel targetPos =
         ( newPos, newVelocity )
 
 
+nestRad =
+    10
+
+
 moveHero : Time -> Model -> Model
 moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
     let
-        ( eggX, eggY ) =
-            V2.toTuple egg.pos
-
         -- hilt is the mouse-controllable point
         hiltPos =
             hiltPosFromHero config hero
@@ -288,10 +289,22 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
         ( newHiltPos, newVel ) =
             moveHilt config timeDelta hiltPos hero.vel mousePos
 
+        aroundEggPos =
+            newHiltPos
+                |> V2.distance egg.pos
+                |> (\d ->
+                        if d > nestRad then
+                            newHiltPos
+                        else
+                            V2.direction newHiltPos egg.pos
+                                |> V2.normalize
+                                |> V2.scale nestRad
+                   )
+
         angle =
             case hero.state of
                 Shield ->
-                    V2.sub egg.pos newHiltPos
+                    V2.sub egg.pos aroundEggPos
                         |> V2.toTuple
                         |> toPolar
                         |> (\( _, angle ) ->
@@ -299,7 +312,7 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
                            )
 
                 Sword ->
-                    V2.sub egg.pos newHiltPos
+                    V2.sub egg.pos aroundEggPos
                         |> V2.toTuple
                         |> toPolar
                         |> (\( _, angle ) ->
@@ -308,7 +321,7 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
 
         newHero =
             { hero
-                | pos = heroPosFromHilt config { hero | angle = angle } newHiltPos
+                | pos = heroPosFromHilt config { hero | angle = angle } aroundEggPos
                 , lastPos = hero.pos
                 , vel = newVel
                 , angle = angle
