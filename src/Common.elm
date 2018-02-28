@@ -29,12 +29,21 @@ type alias Model =
     , cmds : List (Cmd Msg)
     , kaiju : Int
     , numEggs : Int
+    , state : GameState
+    , isStartBtnHovered : Bool
+    , isPaused : Bool
     }
 
 
+type GameState
+    = Start
+    | Playing
+    | GameOver
+    | Victory
+
+
 type alias Config =
-    { isPaused : Bool
-    , heroLength : Float
+    { heroLength : Float
     , heroThickness : Float
     , enemySpeed : Float
     , enemySpawnRate : Float
@@ -109,6 +118,9 @@ type Msg
     | ChangeEnemyClusterSize String
     | WindowChanged ( Int, Int )
     | Resources Resources.Msg
+    | MouseOnStartBtn
+    | MouseOutStartBtn
+    | StartGame
 
 
 getHeroSweepQuadPoints : Config -> Hero -> ( Vec2, Vec2, Vec2, Vec2 )
@@ -198,7 +210,7 @@ getDims vWidth vHeight =
                 h
             else
                 -- too tall!
-                w
+                w / ratio
     in
     ( canvasSize |> round
     , canvasSize * 0.5 |> round

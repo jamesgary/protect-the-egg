@@ -10,9 +10,9 @@ import Game.Resources as Resources exposing (Resources)
 import Game.TwoD as Game
 import Game.TwoD.Camera as Camera exposing (Camera)
 import Game.TwoD.Render as Render exposing (Renderable, circle, customFragment, rectangle, ring)
-import Html exposing (Html, br, dd, div, dl, dt, h1, h2, input, label, p, span, table, td, text, tr)
-import Html.Attributes exposing (checked, class, defaultValue, style, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, br, dd, div, dl, dt, h1, h2, img, input, label, p, span, table, td, text, tr)
+import Html.Attributes exposing (checked, class, defaultValue, src, style, type_, value)
+import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
 import Math.Vector2 as V2 exposing (Vec2)
 import Random
 import Time exposing (Time)
@@ -37,31 +37,72 @@ colors =
 
 
 view : Model -> Html Msg
-view ({ egg, hero, enemies, config, curTime, isGameOver, canvasSize, resources } as model) =
+view ({ egg, hero, enemies, config, curTime, isGameOver, canvasSize, resources, state, viewportWidth, viewportHeight, isStartBtnHovered } as model) =
     div [ class "container" ]
-        [ div [ class "game-container" ]
-            [ renderSidebar model
-            , div [ class "canvas-container" ]
-                [ renderCenteredWithAlias
-                    { time = curTime
-                    , camera = camera
-                    , size = ( canvasSize, canvasSize )
-                    }
-                    (List.concat
-                        [ --viewBg model
-                          viewEgg egg
-                        , viewHero config hero
-                        , List.concat (List.map (viewEnemy resources curTime) enemies)
+        (case state of
+            Start ->
+                let
+                    ( canvasSize, sidebarWidth ) =
+                        getDims viewportWidth viewportHeight
+                in
+                [ div
+                    [ class
+                        ("start-container"
+                            ++ (if isStartBtnHovered then
+                                    " is-hovered"
+                                else
+                                    ""
+                               )
+                        )
+                    , style [ ( "width", px (canvasSize + sidebarWidth) ), ( "height", px canvasSize ) ]
+                    ]
+                    [ img [ src "images/start-screen.png", class "start-screen-img" ] []
+                    , img [ src "images/start-screen-on.png", class "start-screen-on-img" ] []
+                    , div
+                        [ class "start-btn"
+                        , onMouseEnter MouseOnStartBtn
+                        , onMouseLeave MouseOutStartBtn
+                        , onClick StartGame
                         ]
-                    )
-
-                --, renderTextEffects model
+                        []
+                    ]
                 ]
-            ]
-        , viewGameOver isGameOver
 
-        --, viewConfig config
-        ]
+            Playing ->
+                [ div [ class "game-container" ]
+                    [ renderSidebar model
+                    , div [ class "canvas-container" ]
+                        [ renderCenteredWithAlias
+                            { time = curTime
+                            , camera = camera
+                            , size = ( canvasSize, canvasSize )
+                            }
+                            (List.concat
+                                [ --viewBg model
+                                  viewEgg egg
+                                , viewHero config hero
+                                , List.concat (List.map (viewEnemy resources curTime) enemies)
+                                ]
+                            )
+
+                        --, renderTextEffects model
+                        ]
+                    ]
+                , viewGameOver isGameOver
+
+                --, viewConfig config
+                ]
+
+            GameOver ->
+                [ div [ class "game-over-container" ]
+                    []
+                ]
+
+            Victory ->
+                [ div [ class "victory-container" ]
+                    []
+                ]
+        )
 
 
 renderTextEffects : Model -> Html Msg
@@ -72,11 +113,11 @@ renderTextEffects ({ enemies } as model) =
 
 
 renderSidebar : Model -> Html Msg
-renderSidebar ({ sidebarWidth, timeUntilHatch, curTime, kaiju, config, numEggs } as model) =
+renderSidebar ({ sidebarWidth, timeUntilHatch, curTime, kaiju, config, numEggs, isPaused } as model) =
     div [ class "sidebar", style [ ( "width", px sidebarWidth ) ] ]
         [ div [ class "pause-btn", onClick TogglePause ]
             [ text
-                (if config.isPaused then
+                (if isPaused then
                     "Unpause"
                  else
                     "Pause"
@@ -159,10 +200,9 @@ renderCenteredWithAlias { time, size, camera } renderables =
 
 
 viewConfig : Config -> Html Msg
-viewConfig { isPaused, heroLength, heroThickness, enemySpeed, enemySpawnRate, enemyClusterSize } =
+viewConfig { heroLength, heroThickness, enemySpeed, enemySpawnRate, enemyClusterSize } =
     div [ class "config" ]
         [ h2 [] [ text "Config" ]
-        , configCheckbox "Pause" isPaused TogglePause
         , configInput "Hero Length" heroLength ChangeHeroLength
         , configInput "Hero Thickness" heroThickness ChangeHeroThickness
         , configInput "Enemy Speed" enemySpeed ChangeEnemySpeed
@@ -435,14 +475,14 @@ viewEnemy resources curTime { pos, rad, state, seed } =
                     pos |> V2.toTuple
 
                 ( frameToShow, isFlipped ) =
-                    [ ( 1, False )
+                    [ ( 0, False )
+                    , ( 1, False )
                     , ( 2, False )
-                    , ( 3, False )
-                    , ( 2, False )
+                    , ( 1, False )
                     , ( 0, True )
+                    , ( 1, True )
                     , ( 2, True )
-                    , ( 3, True )
-                    , ( 2, True )
+                    , ( 1, True )
                     ]
                         |> Array.fromList
                         |> Array.get ((curTime / 140 |> round) % 8)
@@ -455,12 +495,12 @@ viewEnemy resources curTime { pos, rad, state, seed } =
                         ( -11, 11 )
                     else
                         ( 11, 11 )
-                , texture = Resources.getTexture "images/crab-spritesheet.png" resources
+                , texture = Resources.getTexture "images/quab-spritesheet.png" resources
                 , bottomLeft = ( 0, 0 )
                 , topRight = ( 1, 1 )
                 , duration = 300
                 , numberOfFrames = 4
-                , rotation = pos |> V2.toTuple |> toPolar |> Tuple.second |> (+) (turns 0.25)
+                , rotation = pos |> V2.toTuple |> toPolar |> Tuple.second |> (+) (turns 0.75)
                 , pivot = ( 0.5, 0.5 )
                 , currentFrame = frameToShow
                 }

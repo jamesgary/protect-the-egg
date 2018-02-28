@@ -69,7 +69,7 @@ toggleState hero =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ viewportWidth, viewportHeight, hero, config } as model) =
+update msg ({ viewportWidth, viewportHeight, hero, config, isPaused } as model) =
     case msg of
         MouseClick mousePos ->
             { model | hero = toggleState hero |> (\hero -> { hero | pos = trueMousePos model mousePos }) } ! []
@@ -95,11 +95,7 @@ update msg ({ viewportWidth, viewportHeight, hero, config } as model) =
                 ! []
 
         TogglePause ->
-            let
-                newConfig =
-                    { config | isPaused = not config.isPaused }
-            in
-            { model | config = newConfig } ! []
+            { model | isPaused = not isPaused } ! []
 
         ChangeHeroLength inputStr ->
             let
@@ -158,6 +154,15 @@ update msg ({ viewportWidth, viewportHeight, hero, config } as model) =
 
         Resources msg ->
             { model | resources = Resources.update msg model.resources } ! []
+
+        MouseOnStartBtn ->
+            { model | isStartBtnHovered = True } ! []
+
+        MouseOutStartBtn ->
+            { model | isStartBtnHovered = False } ! []
+
+        StartGame ->
+            { model | isPaused = False, state = Playing } ! []
 
 
 trueMousePos : Model -> Mouse.Point -> Vec2
@@ -592,10 +597,10 @@ moveEnemyCloserToEgg config timeDelta egg enemy =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions ({ isGameOver, config } as model) =
+subscriptions ({ isGameOver, isPaused } as model) =
     Sub.batch
         [ windowChanged WindowChanged
-        , if isGameOver || config.isPaused then
+        , if isGameOver || isPaused then
             Sub.none
           else
             AnimationFrame.diffs Tick

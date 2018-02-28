@@ -66,7 +66,7 @@ Day 27
 - [x] Increase kaiju after quab hit
 - [x] Kaiju progress bar
 - [x] Quabs slowly munch on eggs
-- [ ] Start Screen
+- [x] Start Screen
 - [ ] Onboarding/Tutorial
 - [ ] Victory
 - [ ] Music

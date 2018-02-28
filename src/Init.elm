@@ -49,8 +49,7 @@ init { viewportWidth, viewportHeight, timestamp } =
     , curTime = 0
     , timeUntilHatch = 2 * 60 * 1000 -- TWO MINUTES TO MIIIIIDNIIIIGHT
     , config =
-        { isPaused = False
-        , heroLength = 20
+        { heroLength = 20
         , heroThickness = 5
         , enemySpeed = 3
         , enemySpawnRate = 0.5
@@ -62,8 +61,11 @@ init { viewportWidth, viewportHeight, timestamp } =
     , cmds = []
     , kaiju = 0
     , numEggs = 12
+    , state = Start
+    , isStartBtnHovered = False
+    , isPaused = True
     }
-        ! [ Resources.loadTextures [ "images/crab-spritesheet.png" ]
+        ! [ Resources.loadTextures [ "images/quab-spritesheet.png" ]
                 |> Cmd.map Resources
           ]
 
