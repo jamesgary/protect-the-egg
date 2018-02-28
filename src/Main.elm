@@ -167,7 +167,7 @@ update msg ({ viewportWidth, viewportHeight, hero, config, isPaused } as model) 
             { model | isStartBtnHovered = False } ! []
 
         StartGame ->
-            { model | isPaused = False, state = Playing } ! []
+            { model | isPaused = False, state = Playing } ! [ playWav "pharaos.mp3" ]
 
 
 trueMousePos : Model -> Mouse.Point -> Vec2
@@ -361,7 +361,7 @@ spawnEnemies ({ enemies, qEnemies, curTime, effects, cmds } as model) =
                     { model
                         | enemies = enemy :: enemies
                         , qEnemies = tail
-                        , cmds = playWav "crab-hello" :: cmds
+                        , cmds = playWav "crab-hello.wav" :: cmds
                         , effects =
                             { expTime = curTime + splashLongevity
                             , pos = enemy.pos
@@ -406,7 +406,7 @@ collideHeroAndEnemies ({ config, egg, hero, enemies, curTime, kaiju, cmds } as m
         , kaiju = kaiju + numCollidedEnemies
         , cmds =
             if numCollidedEnemies > 0 then
-                playWav "crab-death" :: cmds
+                playWav "crab-death.wav" :: cmds
             else
                 cmds
     }

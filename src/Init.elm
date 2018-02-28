@@ -55,15 +55,15 @@ init { viewportWidth, viewportHeight, timestamp } =
         , enemySpawnRate = 0.5
         , enemyClusterSize = 3
         }
-    , qEnemies = initQueuedEnemies ( viewportWidth, viewportHeight ) seed |> always []
+    , qEnemies = initQueuedEnemies ( viewportWidth, viewportHeight ) seed
     , mousePos = startingPos
     , resources = Resources.init
     , cmds = []
     , kaiju = 0
     , numEggs = 12
-    , state = Playing --Start
+    , state = Start
     , isStartBtnHovered = False
-    , isPaused = False
+    , isPaused = True
     , isMuted = True
     , effects = []
     }
