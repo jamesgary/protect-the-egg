@@ -345,7 +345,7 @@ updateCurTime timeDelta ({ curTime } as model) =
 
 
 spawnEnemies : Model -> Model
-spawnEnemies ({ enemies, qEnemies, curTime, cmds } as model) =
+spawnEnemies ({ enemies, qEnemies, curTime, effects, cmds } as model) =
     case qEnemies of
         [] ->
             model
@@ -357,6 +357,13 @@ spawnEnemies ({ enemies, qEnemies, curTime, cmds } as model) =
                         | enemies = enemy :: enemies
                         , qEnemies = tail
                         , cmds = playWav "crab-hello" :: cmds
+                        , effects =
+                            { expTime = curTime + splashLongevity
+                            , pos = enemy.pos
+                            , kind = Splash
+                            , seed = enemy.seed
+                            }
+                                :: effects
                     }
             else
                 model

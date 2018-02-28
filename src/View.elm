@@ -37,7 +37,7 @@ colors =
 
 
 view : Model -> Html Msg
-view ({ egg, hero, enemies, config, curTime, isGameOver, canvasSize, resources, state, viewportWidth, viewportHeight, isStartBtnHovered } as model) =
+view ({ egg, hero, enemies, config, curTime, isGameOver, canvasSize, resources, state, viewportWidth, viewportHeight, isStartBtnHovered, effects } as model) =
     div [ class "container" ]
         (case state of
             Start ->
@@ -108,8 +108,9 @@ view ({ egg, hero, enemies, config, curTime, isGameOver, canvasSize, resources, 
                             (List.concat
                                 [ --viewBg model
                                   viewEgg egg
-                                , viewHero config hero
+                                , viewHero model
                                 , List.concat (List.map (viewEnemy resources curTime) enemies)
+                                , List.concat (List.map (viewEffect curTime) effects)
                                 ]
                             )
 
@@ -324,9 +325,12 @@ borderWidth =
     1
 
 
-viewHero : Config -> Hero -> List Renderable
-viewHero config ({ state, pos, lastPos, angle, lastAngle, length, thickness } as hero) =
+viewHero : Model -> List Renderable
+viewHero { hero, config, resources, mousePos } =
     let
+        { state, pos, lastPos, angle, lastAngle, length, thickness } =
+            hero
+
         tl =
             trueLength config hero
 
@@ -354,98 +358,57 @@ viewHero config ({ state, pos, lastPos, angle, lastAngle, length, thickness } as
         leftEye =
             fromPolar ( eyeRad, angle )
                 |> V2.fromTuple
+                |> V2.sub pos
 
         rightEye =
             fromPolar ( -eyeRad, angle )
                 |> V2.fromTuple
+                |> V2.sub pos
 
-        leftEyePupil =
-            leftEye
-                |> V2.add (V2.fromTuple (fromPolar ( 1, angle + turns -0.25 )))
-
-        rightEyePupil =
-            rightEye
-                |> V2.add (V2.fromTuple (fromPolar ( 1, angle + turns -0.25 )))
+        ( leftEyePupil, rightEyePupil ) =
+            if V2.distance pos mousePos > 3 then
+                ( leftEye
+                    |> V2.add
+                        (leftEye
+                            |> V2.direction mousePos
+                            |> V2.scale 1
+                        )
+                , rightEye
+                    |> V2.add
+                        (rightEye
+                            |> V2.direction mousePos
+                            |> V2.scale 1
+                        )
+                )
+            else
+                ( leftEye
+                    |> V2.add (V2.fromTuple (fromPolar ( 1, angle + turns 0.25 )))
+                , rightEye
+                    |> V2.add (V2.fromTuple (fromPolar ( 1, angle + turns 0.25 )))
+                )
 
         ( x, y ) =
             V2.toTuple pos
     in
     List.concat
-        [ -- shell border
-          List.map
-            (viewShape colors.shellBorder)
-            [ Rect
-                { pos = pos
-                , width = tl
-                , height = tt
-                , angle = angle
+        [ [ Render.spriteWithOptions
+                { texture = Resources.getTexture "images/durdle.png" resources
+                , position = ( x, y, 0 )
+                , size = ( tl, tt )
+                , tiling = ( 1, 1 )
+                , rotation = angle
+                , pivot = ( 0.5, 0.5 )
                 }
-            , Circle
-                { pos = V2.add pos sideOffset
-                , rad = tt / 2
-                }
-            , Circle
-                { pos = V2.sub pos sideOffset
-                , rad = tt / 2
-                }
-            ]
-        , -- shell fill
-          List.map
-            (viewShape colors.shellInner)
-            [ Rect
-                { pos = pos
-                , width = tl - borderWidth
-                , height = tt - borderWidth
-                , angle = angle
-                }
-            , Circle
-                { pos = V2.add pos sideOffset
-                , rad = (tt / 2) - (0.5 * borderWidth)
-                }
-            , Circle
-                { pos = V2.sub pos sideOffset
-                , rad = (tt / 2) - (0.5 * borderWidth)
-                }
-            ]
-        , -- inner shell border
-          List.map
-            (viewShape colors.shellBorder)
-            [ Rect
-                { pos = V2.sub pos almostHalfwayDownOffset
-                , width = tl + borderWidth
-                , height = (tt + (2 * borderWidth)) / 2
-                , angle = angle
-                }
-            ]
-        , -- durdle body border
-          List.map
-            (viewShape colors.durdleSkinBorder)
-            [ Rect
-                { pos = V2.sub pos halfwayDownOffset
-                , width = tl
-                , height = tt / 2
-                , angle = angle
-                }
-            ]
-        , -- durdle body fill
-          List.map
-            (viewShape colors.durdleSkin)
-            [ Rect
-                { pos = V2.sub pos almostHalfwayDownOffset
-                , width = tl
-                , height = tt / 2
-                , angle = angle
-                }
-            ]
+          ]
         , -- eye fills
           List.map
             (viewShape colors.eyeFill)
             [ Circle
-                { pos = V2.sub pos leftEye
+                { pos = leftEye
                 , rad = eyeRad
                 }
             , Circle
-                { pos = V2.sub pos rightEye
+                { pos = rightEye
                 , rad = eyeRad
                 }
             ]
@@ -453,11 +416,11 @@ viewHero config ({ state, pos, lastPos, angle, lastAngle, length, thickness } as
           List.map
             (viewShape colors.eyePupil)
             [ Circle
-                { pos = V2.sub pos leftEyePupil
+                { pos = leftEyePupil
                 , rad = eyePupilRad
                 }
             , Circle
-                { pos = V2.sub pos rightEyePupil
+                { pos = rightEyePupil
                 , rad = eyePupilRad
                 }
             ]
@@ -492,6 +455,19 @@ viewShape color shape =
                 }
 
 
+quabFrames =
+    [ ( 0, False )
+    , ( 2, False )
+    , ( 3, False )
+    , ( 2, False )
+    , ( 1, True )
+    , ( 2, True )
+    , ( 3, True )
+    , ( 2, True )
+    ]
+        |> Array.fromList
+
+
 viewEnemy : Resources -> Time -> Enemy -> List Renderable
 viewEnemy resources curTime { pos, rad, state, seed } =
     case state of
@@ -503,17 +479,8 @@ viewEnemy resources curTime { pos, rad, state, seed } =
                     pos |> V2.toTuple
 
                 ( frameToShow, isFlipped ) =
-                    [ ( 0, False )
-                    , ( 1, False )
-                    , ( 2, False )
-                    , ( 1, False )
-                    , ( 0, True )
-                    , ( 1, True )
-                    , ( 2, True )
-                    , ( 1, True )
-                    ]
-                        |> Array.fromList
-                        |> Array.get ((curTime / 140 |> round) % 8)
+                    quabFrames
+                        |> Array.get ((curTime / 140 |> round) % Array.length quabFrames)
                         |> Maybe.withDefault ( 0, True )
               in
               Render.manuallyManagedAnimatedSpriteWithOptions
@@ -579,6 +546,55 @@ viewEnemy resources curTime { pos, rad, state, seed } =
                                         color
                                         (V2.add pos (V2.fromTuple ( x, y )))
                                         (0.5 * smokeRad)
+                               )
+                    )
+            ]
+                |> List.concat
+
+
+viewEffect : Time -> Effect -> List Renderable
+viewEffect curTime ({ expTime, kind, pos, seed } as effect) =
+    case kind of
+        Splash ->
+            let
+                age =
+                    curTime - (expTime - splashLongevity)
+
+                progress =
+                    age / splashLongevity
+
+                waterRad =
+                    5 + 1.5 * progress
+
+                opacity =
+                    0.9 - (0.9 * progress)
+
+                -- List (Float, Float, Float)
+                -- [(angle, sizeMod, speed)]
+                ( particles, _ ) =
+                    Random.step
+                        (Random.list 10
+                            (Random.map3 (,,)
+                                (Random.float 0 (turns 1))
+                                (Random.float 0.1 0.6)
+                                (Random.float 12 20)
+                            )
+                        )
+                        seed
+
+                color =
+                    Color.rgba 255 255 255 opacity
+            in
+            [ [ viewTransparentCircle color pos waterRad ]
+            , particles
+                |> List.map
+                    (\( angle, sizeMod, speed ) ->
+                        fromPolar ( speed * Ease.outCubic progress, angle )
+                            |> (\( x, y ) ->
+                                    viewTransparentCircle
+                                        color
+                                        (V2.add pos (V2.fromTuple ( x, y )))
+                                        (sizeMod * waterRad)
                                )
                     )
             ]

@@ -32,6 +32,8 @@ type alias Model =
     , state : GameState
     , isStartBtnHovered : Bool
     , isPaused : Bool
+    , isMuted : Bool -- TODO: use me!
+    , effects : List Effect
     }
 
 
@@ -40,6 +42,18 @@ type GameState
     | Playing
     | GameOver
     | Victory
+
+
+type alias Effect =
+    { expTime : Time
+    , pos : Vec2
+    , seed : Random.Seed
+    , kind : EffectKind
+    }
+
+
+type EffectKind
+    = Splash
 
 
 type alias Config =
@@ -215,3 +229,7 @@ getDims vWidth vHeight =
     ( canvasSize |> round
     , canvasSize * 0.5 |> round
     )
+
+
+splashLongevity =
+    1000

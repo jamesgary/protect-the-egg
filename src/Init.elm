@@ -61,11 +61,16 @@ init { viewportWidth, viewportHeight, timestamp } =
     , cmds = []
     , kaiju = 0
     , numEggs = 12
-    , state = Start
+    , state = Playing --Start
     , isStartBtnHovered = False
-    , isPaused = True
+    , isPaused = False
+    , isMuted = True
+    , effects = []
     }
-        ! [ Resources.loadTextures [ "images/quab-spritesheet.png" ]
+        ! [ Resources.loadTextures
+                [ "images/quab-spritesheet.png"
+                , "images/durdle.png"
+                ]
                 |> Cmd.map Resources
           ]
 
