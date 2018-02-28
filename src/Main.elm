@@ -59,20 +59,25 @@ clusterGenerator { enemyClusterSize } =
 
 
 toggleState : Hero -> Hero
-toggleState hero =
-    case hero.state of
+toggleState ({ state, angle } as hero) =
+    case state of
         Sword ->
-            { hero | state = Shield }
+            { hero | state = Shield, angle = angle - turns 0.25 }
 
         Shield ->
-            { hero | state = Sword }
+            { hero | state = Sword, angle = angle + turns 0.25 }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ viewportWidth, viewportHeight, hero, config, isPaused } as model) =
     case msg of
         MouseClick mousePos ->
-            { model | hero = toggleState hero |> (\hero -> { hero | pos = trueMousePos model mousePos }) } ! []
+            { model
+                | hero =
+                    toggleState hero
+                        |> (\hero -> { hero | pos = trueMousePos model mousePos })
+            }
+                ! []
 
         MouseMove mousePos ->
             { model | mousePos = trueMousePos model mousePos } ! []

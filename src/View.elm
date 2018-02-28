@@ -326,7 +326,17 @@ borderWidth =
 
 
 viewHero : Model -> List Renderable
-viewHero { hero, config, resources, mousePos } =
+viewHero model =
+    case model.hero.state of
+        Shield ->
+            viewShield model
+
+        Sword ->
+            viewSword model
+
+
+viewShield : Model -> List Renderable
+viewShield { hero, config, resources, mousePos } =
     let
         { state, pos, lastPos, angle, lastAngle, length, thickness } =
             hero
@@ -427,6 +437,34 @@ viewHero { hero, config, resources, mousePos } =
         ]
 
 
+viewSword : Model -> List Renderable
+viewSword { hero, config, resources, mousePos } =
+    let
+        { state, pos, lastPos, angle, lastAngle, length, thickness } =
+            hero
+
+        tl =
+            trueLength config hero
+
+        tt =
+            trueThickness config hero
+
+        ( x, y ) =
+            V2.toTuple pos
+    in
+    List.concat
+        [ [ Render.spriteWithOptions
+                { texture = Resources.getTexture "images/kaiju.png" resources
+                , position = ( x, y, 0 )
+                , size = ( tt, tl )
+                , tiling = ( 1, 1 )
+                , rotation = angle - turns 0.25
+                , pivot = ( 0.5, 0.5 )
+                }
+          ]
+        ]
+
+
 heroColor =
     Color.rgb 20 130 80
 
@@ -472,9 +510,7 @@ viewEnemy : Resources -> Time -> Enemy -> List Renderable
 viewEnemy resources curTime { pos, rad, state, seed } =
     case state of
         Alive ->
-            [ --viewCircle Color.black pos (rad + eggBorder),
-              --viewCircle (Color.rgba 255 0 0 0.02) pos rad
-              let
+            [ let
                 ( x, y ) =
                     pos |> V2.toTuple
 

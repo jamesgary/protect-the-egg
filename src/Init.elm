@@ -55,7 +55,7 @@ init { viewportWidth, viewportHeight, timestamp } =
         , enemySpawnRate = 0.5
         , enemyClusterSize = 3
         }
-    , qEnemies = initQueuedEnemies ( viewportWidth, viewportHeight ) seed
+    , qEnemies = initQueuedEnemies ( viewportWidth, viewportHeight ) seed |> always []
     , mousePos = startingPos
     , resources = Resources.init
     , cmds = []
@@ -70,6 +70,7 @@ init { viewportWidth, viewportHeight, timestamp } =
         ! [ Resources.loadTextures
                 [ "images/quab-spritesheet.png"
                 , "images/durdle.png"
+                , "images/kaiju.png"
                 ]
                 |> Cmd.map Resources
           ]
