@@ -275,10 +275,6 @@ moveHilt config timeDelta oldPos oldVel targetPos =
         ( newPos, newVelocity )
 
 
-nestRad =
-    10
-
-
 moveHero : Time -> Model -> Model
 moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
     let
@@ -293,12 +289,16 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
             newHiltPos
                 |> V2.distance egg.pos
                 |> (\d ->
-                        if d > nestRad then
-                            newHiltPos
-                        else
+                        if d < nestRad then
                             V2.direction newHiltPos egg.pos
                                 |> V2.normalize
                                 |> V2.scale nestRad
+                        else if d > beachRad then
+                            V2.direction newHiltPos egg.pos
+                                |> V2.normalize
+                                |> V2.scale beachRad
+                        else
+                            newHiltPos
                    )
 
         angle =

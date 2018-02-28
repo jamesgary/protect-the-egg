@@ -153,6 +153,18 @@ trueThickness { heroThickness } { thickness } =
     heroThickness * thickness
 
 
+nestRad =
+    10
+
+
+beachRad =
+    87
+
+
+quabSpawnDist =
+    beachRad + 5
+
+
 
 -- Game 2d stuff
 -- 200x200, with 0,0 as the center (top left is -100,-100, bottom right is 100,100)

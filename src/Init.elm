@@ -138,7 +138,7 @@ initCluster seed timeToSpawn numEnemies angle =
                         600
 
                     distFromEggToSpawn =
-                        93
+                        quabSpawnDist
 
                     pos =
                         ( distFromEggToSpawn, angle )
