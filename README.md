@@ -67,10 +67,10 @@ Day 27
 - [x] Kaiju progress bar
 - [x] Quabs slowly munch on eggs
 - [x] Start Screen
-- [ ] Onboarding/Tutorial
-- [ ] Victory
-- [ ] Music
-- [ ] Better game over (restart)
+- [x] Music
+- [x] Victory
+- [x] Better game over (restart)
+- [x] Onboarding/Tutorial
 
 Future steps:
 - [ ] C-C-C-COMBOS

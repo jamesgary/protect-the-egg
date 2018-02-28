@@ -17,21 +17,18 @@ type alias Model =
     , egg : Egg
     , hero : Hero
     , enemies : List Enemy
-    , isGameOver : Bool
     , seed : Random.Seed
     , timeSinceLastSpawn : Time
     , curTime : Time
-    , timeUntilHatch : Time
     , config : Config
     , mousePos : Vec2
     , qEnemies : List ( Time, Enemy ) -- queued enemies
     , resources : Resources
     , cmds : List (Cmd Msg)
-    , kaiju : Int
+    , kaiju : Float
     , numEggs : Int
     , state : GameState
     , isStartBtnHovered : Bool
-    , isPaused : Bool
     , isMuted : Bool -- TODO: use me!
     , effects : List Effect
     }
@@ -39,6 +36,7 @@ type alias Model =
 
 type GameState
     = Start
+    | Paused
     | Playing
     | GameOver
     | Victory
@@ -135,6 +133,7 @@ type Msg
     | MouseOnStartBtn
     | MouseOutStartBtn
     | StartGame
+    | TryAgain
 
 
 getHeroSweepQuadPoints : Config -> Hero -> ( Vec2, Vec2, Vec2, Vec2 )
@@ -233,3 +232,8 @@ getDims vWidth vHeight =
 
 splashLongevity =
     1000
+
+
+timeUntilHatch =
+    -- Length of pharaos song
+    93 * 1000

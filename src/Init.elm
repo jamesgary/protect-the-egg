@@ -1,4 +1,4 @@
-module Init exposing (init)
+module Init exposing (init, tryAgain)
 
 import Common exposing (..)
 import Game.Resources as Resources exposing (Resources)
@@ -43,11 +43,9 @@ init { viewportWidth, viewportHeight, timestamp } =
         , vel = V2.fromTuple ( 0, 0 )
         }
     , enemies = enemies
-    , isGameOver = False
     , seed = newSeed
     , timeSinceLastSpawn = 0
     , curTime = 0
-    , timeUntilHatch = 2 * 60 * 1000 -- TWO MINUTES TO MIIIIIDNIIIIGHT
     , config =
         { heroLength = 20
         , heroThickness = 5
@@ -63,7 +61,6 @@ init { viewportWidth, viewportHeight, timestamp } =
     , numEggs = 12
     , state = Start
     , isStartBtnHovered = False
-    , isPaused = True
     , isMuted = True
     , effects = []
     }
@@ -76,23 +73,44 @@ init { viewportWidth, viewportHeight, timestamp } =
           ]
 
 
+tryAgain : Model -> Model
+tryAgain ({ hero, seed, viewportWidth, viewportHeight } as model) =
+    { model
+        | hero = { hero | state = Shield }
+        , enemies = []
+        , timeSinceLastSpawn = 0
+        , curTime = 0
+        , qEnemies = initQueuedEnemies ( viewportWidth, viewportHeight ) seed
+        , kaiju = 0
+        , numEggs = 12
+        , state = Playing
+        , effects = []
+    }
+
+
 initQueuedEnemies : ( Int, Int ) -> Random.Seed -> List ( Time, Enemy )
 initQueuedEnemies ( viewportWidth, viewportHeight ) seed =
     let
         wave1Time =
-            0
-
-        wave2Time =
             5000
 
-        wave3Time =
+        wave2Time =
             10000
 
-        wave4Time =
+        wave3Time =
             15000
 
-        wave5Time =
+        wave4Time =
             25000
+
+        wave5Time =
+            50000
+
+        wave6Time =
+            68000
+
+        wave7Time =
+            83000
 
         twelvth =
             turns (1 / 12)
@@ -122,7 +140,7 @@ initQueuedEnemies ( viewportWidth, viewportHeight ) seed =
     , List.range 0 12
         |> List.map
             (\i ->
-                initCluster seed (wave4Time + (2000 * toFloat i)) 5 (top - (toFloat i * turns (1 / 12)))
+                initCluster seed (wave4Time + (2000 * toFloat i)) 2 (top - (toFloat i * turns (1 / 12)))
             )
         |> List.concat
 
@@ -130,12 +148,54 @@ initQueuedEnemies ( viewportWidth, viewportHeight ) seed =
     , List.range 0 48
         |> List.map
             (\i ->
-                initCluster seed (wave5Time + (100 * toFloat i)) 1 (top - (toFloat i * turns (1 / 48)))
+                initCluster seed (wave5Time + (300 * toFloat i)) 1 (top - (toFloat i * turns (1 / 48)))
+            )
+        |> List.concat
+
+    -- wave 6, singles coming in at the same time
+    , List.range 0 1
+        |> List.map
+            (\i ->
+                initCluster seed wave6Time 1 (top - (toFloat i * turns (1 / 2)))
+            )
+        |> List.concat
+    , List.range 0 2
+        |> List.map
+            (\i ->
+                initCluster seed (wave6Time + 2000) 1 (top - (toFloat i * turns (1 / 3)))
+            )
+        |> List.concat
+    , List.range 0 3
+        |> List.map
+            (\i ->
+                initCluster seed (wave6Time + 5000) 1 (top - (toFloat i * turns (1 / 4)))
+            )
+        |> List.concat
+    , List.range 0 4
+        |> List.map
+            (\i ->
+                initCluster seed (wave6Time + 8000) 1 (top - (toFloat i * turns (1 / 5)))
+            )
+        |> List.concat
+    , List.range 0 5
+        |> List.map
+            (\i ->
+                initCluster seed (wave6Time + 12000) 1 (top - (toFloat i * turns (1 / 6)))
+            )
+        |> List.concat
+    , List.range 0 48
+        |> List.map
+            (\i ->
+                initCluster seed (wave7Time + (100 * toFloat i)) 1 (top + (toFloat i * turns (1 / 48)))
             )
         |> List.concat
     ]
         |> List.concat
         |> List.sortBy Tuple.first
+
+
+
+-- wave 7, singles spiraling in from all around!
 
 
 initCluster : Random.Seed -> Time -> Int -> Float -> List ( Time, Enemy )

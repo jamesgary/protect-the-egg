@@ -10,7 +10,7 @@ import Game.Resources as Resources exposing (Resources)
 import Game.TwoD as Game
 import Game.TwoD.Camera as Camera exposing (Camera)
 import Game.TwoD.Render as Render exposing (Renderable, circle, customFragment, rectangle, ring)
-import Html exposing (Html, a, br, dd, div, dl, dt, h1, h2, img, input, label, p, span, table, td, text, tr)
+import Html exposing (Html, a, br, dd, div, dl, dt, h1, h2, hr, img, input, label, p, span, table, td, text, tr)
 import Html.Attributes exposing (checked, class, defaultValue, href, src, style, target, type_, value)
 import Html.Events exposing (onClick, onInput, onMouseEnter, onMouseLeave)
 import Math.Vector2 as V2 exposing (Vec2)
@@ -20,7 +20,7 @@ import WebGL
 
 
 eggBorder =
-    0.8
+    0.4
 
 
 colors =
@@ -37,7 +37,7 @@ colors =
 
 
 view : Model -> Html Msg
-view ({ egg, hero, enemies, config, curTime, isGameOver, canvasSize, resources, state, viewportWidth, viewportHeight, isStartBtnHovered, effects } as model) =
+view ({ egg, hero, enemies, config, curTime, canvasSize, resources, state, viewportWidth, viewportHeight, isStartBtnHovered, effects, numEggs } as model) =
     div [ class "container" ]
         (case state of
             Start ->
@@ -96,7 +96,7 @@ view ({ egg, hero, enemies, config, curTime, isGameOver, canvasSize, resources, 
                     ]
                 ]
 
-            Playing ->
+            _ ->
                 [ div [ class "game-container" ]
                     [ renderSidebar model
                     , div [ class "canvas-container" ]
@@ -106,30 +106,16 @@ view ({ egg, hero, enemies, config, curTime, isGameOver, canvasSize, resources, 
                             , size = ( canvasSize, canvasSize )
                             }
                             (List.concat
-                                [ --viewBg model
-                                  viewEgg egg
+                                [ viewEggs numEggs
                                 , viewHero model
                                 , List.concat (List.map (viewEnemy resources curTime) enemies)
                                 , List.concat (List.map (viewEffect curTime) effects)
                                 ]
                             )
-
-                        --, renderTextEffects model
                         ]
                     ]
-                , viewGameOver isGameOver
-
-                --, viewConfig config
-                ]
-
-            GameOver ->
-                [ div [ class "game-over-container" ]
-                    []
-                ]
-
-            Victory ->
-                [ div [ class "victory-container" ]
-                    []
+                , viewGameOver model
+                , viewVictory model
                 ]
         )
 
@@ -142,14 +128,16 @@ renderTextEffects ({ enemies } as model) =
 
 
 renderSidebar : Model -> Html Msg
-renderSidebar ({ sidebarWidth, timeUntilHatch, curTime, kaiju, config, numEggs, isPaused } as model) =
+renderSidebar ({ sidebarWidth, curTime, kaiju, config, numEggs, state } as model) =
     div [ class "sidebar", style [ ( "width", px sidebarWidth ) ] ]
         [ div [ class "pause-btn", onClick TogglePause ]
             [ text
-                (if isPaused then
-                    "Unpause"
-                 else
-                    "Pause"
+                (case state of
+                    Paused ->
+                        "Unpause"
+
+                    _ ->
+                        "Pause"
                 )
             ]
         , table [ class "sidebar-list" ]
@@ -157,11 +145,6 @@ renderSidebar ({ sidebarWidth, timeUntilHatch, curTime, kaiju, config, numEggs, 
                 [ td [ class "label" ] [ text "Time until hatch:" ]
                 , td [ class "val" ] [ text (viewTime (timeUntilHatch - curTime)) ]
                 ]
-
-            --, tr [ class "group" ]
-            --    [ td [ class "label" ] [ text "Score" ]
-            --    , td [ class "val" ] [ formatNum 1024 |> text ]
-            --    ]
             , tr [ class "group" ]
                 [ td [ class "label" ] [ text "Eggs left" ]
                 , td [ class "val" ] [ formatNum numEggs |> text ]
@@ -171,10 +154,15 @@ renderSidebar ({ sidebarWidth, timeUntilHatch, curTime, kaiju, config, numEggs, 
                 , td [ class "val" ] [ renderKaiju kaiju ]
                 ]
             ]
+        , hr [] []
+        , p [ class "instructions" ] [ text "- Quabs are chomping at the bit for your eggs!" ]
+        , p [ class "instructions" ] [ text "- Smash them away with your shell!" ]
+        , p [ class "instructions" ] [ text "- The more quabs you smash, the more your Kaiju meter increases!" ]
+        , p [ class "instructions" ] [ text "- Click to unleash your Kaiju rage!" ]
         ]
 
 
-renderKaiju : Int -> Html Msg
+renderKaiju : Float -> Html Msg
 renderKaiju kaiju =
     div [ class "kaiju-container" ]
         [ div
@@ -288,11 +276,43 @@ viewBg { viewportWidth, viewportHeight } =
     ]
 
 
-viewEgg : Egg -> List Renderable
-viewEgg { pos, rad } =
-    [ viewCircle Color.black pos (rad + eggBorder)
-    , viewCircle Color.white pos rad
+nestPos =
+    V2.fromTuple ( 0, 0 )
+
+
+eggPosList =
+    [ ( -0.9, -1.5 )
+    , ( 0.5, 1.2 )
+    , ( 0.0, -1.1 )
+    , ( 0.9, 0.3 )
+    , ( -0.3, 1.3 )
+    , ( 0.9, -1.2 )
+    , ( 1.4, -0.4 )
+    , ( -0.8, 0.3 )
+    , ( -1.3, -0.4 )
+    , ( 0.2, -0.5 )
+    , ( -0.3, -0.3 )
+    , ( 0.1, 0.2 )
     ]
+        |> List.map V2.fromTuple
+        |> List.map (V2.scale 3)
+
+
+eggSize =
+    2
+
+
+viewEggs : Int -> List Renderable
+viewEggs numEggs =
+    eggPosList
+        |> List.take numEggs
+        |> List.map
+            (\pos ->
+                [ viewOval Color.black pos (eggSize + eggBorder) 0.8
+                , viewOval Color.white pos eggSize 0.8
+                ]
+            )
+        |> List.concat
 
 
 viewRing : Color -> Vec2 -> Float -> Renderable
@@ -305,6 +325,25 @@ viewRing color pos rad =
         { color = color
         , position = ( x - rad, y - rad )
         , size = ( rad * 2, rad * 2 )
+        }
+
+
+viewOval : Color -> Vec2 -> Float -> Float -> Renderable
+viewOval color pos rad skew =
+    let
+        ( x, y ) =
+            V2.toTuple pos
+
+        hRad =
+            rad * skew
+
+        vRad =
+            rad / skew
+    in
+    Render.shape circle
+        { color = color
+        , position = ( x - hRad, y - vRad )
+        , size = ( hRad * 2, vRad * 2 )
         }
 
 
@@ -707,16 +746,44 @@ void main () {
 |]
 
 
-viewGameOver : Bool -> Html Msg
-viewGameOver isGameOver =
-    if isGameOver then
-        div [ class "game-over-container" ]
-            [ h1
-                [ class "game-over" ]
-                [ text "GAME OVER!" ]
-            ]
-    else
-        text ""
+viewGameOver : Model -> Html Msg
+viewGameOver { state } =
+    case state of
+        GameOver ->
+            div [ class "game-over-container" ]
+                [ div [ class "game-over" ]
+                    [ h1 [] [ text "GAME OVER!" ]
+                    , div
+                        [ class "try-again-btn", onClick TryAgain ]
+                        [ text "Try Again" ]
+                    ]
+                ]
+
+        _ ->
+            text ""
+
+
+viewVictory : Model -> Html Msg
+viewVictory ({ state } as model) =
+    case state of
+        Victory ->
+            div [ class "victory-container" ]
+                [ div
+                    [ class "victory" ]
+                    [ p []
+                        [ text "You protected your eggs!"
+                        , br [] []
+                        , text "Your lineage will live on forever."
+                        , br [] []
+                        , text "This calls for a shell-ebration!"
+                        , br [] []
+                        ]
+                    , div [ class "play-again-btn", onClick TryAgain ] [ text "Play Again" ]
+                    ]
+                ]
+
+        _ ->
+            text ""
 
 
 px : number -> String

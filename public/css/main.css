@@ -123,6 +123,7 @@ a:hover {
   box-shadow: 1px 2px 1px rgba(0,0,0,0.8);
   border-radius: 4px;
   display: inline-block;
+  font-size: 4rem;
 }
 
 .sidebar .pause-btn:hover {
@@ -136,6 +137,7 @@ a:hover {
 .sidebar-list .group {
   clear: both;
   vertical-align: bottom;
+  height: 4rem;
 }
 
 .sidebar-list .label,
@@ -171,7 +173,14 @@ a:hover {
   box-shadow: 0 0 2px 0px rgba(210, 255, 255, 0.9);
 }
 
-.game-over-container {
+.instructions {
+  font-size: 2.5vmin;
+}
+
+/* THRILL OF VICTORY AND AGONY OF DEFEAT */
+
+.game-over-container,
+.victory-container {
   width: 100%;
   height: 100%;
   display: flex;
@@ -182,15 +191,46 @@ a:hover {
   left: 0;
 }
 
-.game-over {
+.game-over,
+.victory {
   z-index: 100;
   position: relative;
-  background: #292929;
-  color: white;
+  background: rgba(0,0,0,0.8);
   display: inline-block;
-  padding: 9px 25px;
-  border-radius: 8px;
-  top: -90px;
+  padding: 8vmin 8vmin;
+  border-radius: 3vmin;
+  top: -9vmin;
+  text-align: center;
+}
+
+.game-over h1,
+.victory p {
+  color: white;
+  font-size: 8rem;
+  padding: 0;
+  margin: 0;
+}
+
+.victory p {
+  font-size: 6em;
+}
+
+.play-again-btn,
+.try-again-btn {
+  color: white;
+  background: #18f;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: inline-block;
+  font-size: 4rem;
+}
+
+.play-again-btn { margin-top: 4vmin; }
+
+.play-again-btn:hover,
+.try-again-btn:hover {
+  background: #06e;
 }
 
 /* CONFIG */

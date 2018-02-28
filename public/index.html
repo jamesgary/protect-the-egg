@@ -43,6 +43,24 @@
           console.error("Couldn't find " + name + "!");
         }
       });
+
+      var pauseAll = function() {
+        for (var i = 0; i < soundNames.length; i++) {
+          soundSrcs[soundNames[i]].pause();
+        }
+      }
+
+      app.ports.playSong.subscribe(function() {
+        soundSrcs["pharaos.mp3"].play();
+      });
+
+      app.ports.pauseSong.subscribe(function() {
+        soundSrcs["pharaos.mp3"].pause();
+      });
+
+      app.ports.stopSong.subscribe(function() {
+        soundSrcs["pharaos.mp3"].stop();
+      });
     </script>
   </body>
 </html>

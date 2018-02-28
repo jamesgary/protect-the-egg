@@ -6,10 +6,10 @@ import ElementRelativeMouseEvents as Mouse
 import Game.Resources as Resources exposing (Resources)
 import Game.TwoD.Camera exposing (viewportToGameCoordinates)
 import Html
-import Init exposing (init)
+import Init exposing (init, tryAgain)
 import Math
 import Math.Vector2 as V2 exposing (Vec2)
-import Ports exposing (playWav, windowChanged)
+import Ports exposing (pauseSong, playSong, playWav, stopSong, windowChanged)
 import Random
 import Time exposing (Time)
 import View exposing (view)
@@ -69,7 +69,7 @@ toggleState ({ state, angle } as hero) =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ viewportWidth, viewportHeight, hero, config, isPaused } as model) =
+update msg ({ viewportWidth, viewportHeight, hero, config, state } as model) =
     case msg of
         MouseClick mousePos ->
             { model
@@ -100,7 +100,12 @@ update msg ({ viewportWidth, viewportHeight, hero, config, isPaused } as model) 
                 ! []
 
         TogglePause ->
-            { model | isPaused = not isPaused } ! []
+            case state of
+                Paused ->
+                    { model | state = Playing } ! [ playSong () ]
+
+                _ ->
+                    { model | state = Paused } ! [ pauseSong () ]
 
         ChangeHeroLength inputStr ->
             let
@@ -167,7 +172,10 @@ update msg ({ viewportWidth, viewportHeight, hero, config, isPaused } as model) 
             { model | isStartBtnHovered = False } ! []
 
         StartGame ->
-            { model | isPaused = False, state = Playing } ! [ playWav "pharaos.mp3" ]
+            { model | state = Playing } ! [ playWav "pharaos.mp3" ]
+
+        TryAgain ->
+            tryAgain model ! [ playSong () ]
 
 
 trueMousePos : Model -> Mouse.Point -> Vec2
@@ -329,6 +337,7 @@ tick : Time -> Model -> ( Model, Cmd Msg )
 tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos } as model) =
     model
         |> updateCurTime timeDelta
+        |> exhaustKaiju timeDelta
         |> moveHero timeDelta
         |> spawnEnemies
         |> moveEnemies timeDelta
@@ -336,7 +345,32 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos
         |> removeDeadEnemies
         |> eatEggs
         |> checkGameOver
+        |> checkVictory
         |> cmdify
+
+
+exhaustKaiju : Time -> Model -> Model
+exhaustKaiju timeDelta ({ kaiju, hero } as model) =
+    case hero.state of
+        Shield ->
+            model
+
+        Sword ->
+            let
+                kaijuRemaining =
+                    kaiju - (timeDelta * 0.01)
+            in
+            { model
+                | kaiju = kaijuRemaining
+                , hero =
+                    { hero
+                        | state =
+                            if kaijuRemaining > 0 then
+                                Sword
+                            else
+                                Shield
+                    }
+            }
 
 
 cmdify : Model -> ( Model, Cmd Msg )
@@ -403,7 +437,7 @@ collideHeroAndEnemies ({ config, egg, hero, enemies, curTime, kaiju, cmds } as m
     { model
         | enemies = newEnemies
         , hero = newHero
-        , kaiju = kaiju + numCollidedEnemies
+        , kaiju = kaiju + 2 * toFloat numCollidedEnemies
         , cmds =
             if numCollidedEnemies > 0 then
                 playWav "crab-death.wav" :: cmds
@@ -418,7 +452,7 @@ removeDeadEnemies ({ enemies, config, curTime } as model) =
 
 
 munchTime =
-    1000
+    600
 
 
 eatEggs : Model -> Model
@@ -440,8 +474,22 @@ eatEggs ({ egg, enemies, curTime, numEggs } as model) =
 
 
 checkGameOver : Model -> Model
-checkGameOver ({ numEggs } as model) =
-    { model | isGameOver = numEggs <= 0 }
+checkGameOver ({ numEggs, cmds } as model) =
+    if numEggs > 0 then
+        model
+    else
+        { model
+            | state = GameOver
+            , cmds = stopSong () :: cmds
+        }
+
+
+checkVictory : Model -> Model
+checkVictory ({ curTime, cmds } as model) =
+    if curTime < timeUntilHatch then
+        model
+    else
+        { model | state = Victory, cmds = stopSong () :: cmds }
 
 
 
@@ -609,13 +657,15 @@ moveEnemyCloserToEgg config timeDelta egg enemy =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions ({ isGameOver, isPaused } as model) =
+subscriptions ({ state } as model) =
     Sub.batch
         [ windowChanged WindowChanged
-        , if isGameOver || isPaused then
-            Sub.none
-          else
-            AnimationFrame.diffs Tick
+        , case state of
+            Playing ->
+                AnimationFrame.diffs Tick
+
+            _ ->
+                Sub.none
         ]
 
 
