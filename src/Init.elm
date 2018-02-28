@@ -59,6 +59,7 @@ init { viewportWidth, viewportHeight, timestamp } =
     , qEnemies = initQueuedEnemies ( viewportWidth, viewportHeight ) seed
     , mousePos = startingPos
     , resources = Resources.init
+    , cmds = []
     }
         ! [ Resources.loadTextures [ "images/crab-spritesheet.png" ]
                 |> Cmd.map Resources
@@ -137,7 +138,7 @@ initCluster seed timeToSpawn numEnemies angle =
                         600
 
                     distFromEggToSpawn =
-                        60
+                        93
 
                     pos =
                         ( distFromEggToSpawn, angle )

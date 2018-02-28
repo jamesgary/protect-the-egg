@@ -26,6 +26,7 @@ type alias Model =
     , mousePos : Vec2
     , qEnemies : List ( Time, Enemy ) -- queued enemies
     , resources : Resources
+    , cmds : List (Cmd Msg)
     }
 
 

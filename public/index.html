@@ -3,8 +3,10 @@
   <head>
     <title>Protect the Egg!</title>
     <link rel="stylesheet" type="text/css" href="./css/main.css">
+    <link href="https://fonts.googleapis.com/css?family=Catamaran:700|Source+Code+Pro:700" rel="stylesheet">
   </head>
   <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.0.9/howler.core.min.js"></script>
     <script src="./js/main.js" charset="utf-8"></script>
     <script>
       var width = window.innerWidth;
@@ -22,6 +24,22 @@
           window.innerHeight,
         ]);
       };
+
+      var death = new Howl({ src: ['./sounds/crab-death.wav'] });
+      var hello = new Howl({ src: ['./sounds/crab-hello.wav'] });
+      var soundNames = [
+        "crab-death",
+        "crab-hello",
+      ];
+      var soundSrcs = {};
+      for (var i = 0; i < soundNames.length; i++) {
+        var name = soundNames[i];
+        soundSrcs[name] = new Howl({ src: ['./sounds/' + name + '.wav'] });
+      }
+
+      app.ports.playWav.subscribe(function(name) {
+        soundSrcs[name].play();
+      });
     </script>
   </body>
 </html>

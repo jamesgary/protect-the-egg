@@ -9,7 +9,7 @@ import Html
 import Init exposing (init)
 import Math
 import Math.Vector2 as V2 exposing (Vec2)
-import Ports exposing (windowChanged)
+import Ports exposing (playWav, windowChanged)
 import Random
 import Time exposing (Time)
 import View exposing (view)
@@ -95,12 +95,12 @@ update msg ({ viewportWidth, viewportHeight, hero, config } as model) =
 
         Tick timeDelta ->
             -- max time delta is 30 FPS (1000 / 30 == 33)
-            tick (min timeDelta 33) model ! []
+            tick (min timeDelta 33) model
 
         WindowChanged ( width, height ) ->
             let
                 ( canvasSize, sidebarWidth ) =
-                    getDims viewportWidth viewportHeight
+                    getDims width height
             in
             { model
                 | viewportWidth = width
@@ -318,7 +318,7 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
     { model | hero = newHero }
 
 
-tick : Time -> Model -> Model
+tick : Time -> Model -> ( Model, Cmd Msg )
 tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos } as model) =
     model
         |> updateCurTime timeDelta
@@ -328,6 +328,12 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos
         |> collideHeroAndEnemies
         |> removeDeadEnemies
         |> checkGameOver
+        |> cmdify
+
+
+cmdify : Model -> ( Model, Cmd Msg )
+cmdify ({ cmds } as model) =
+    { model | cmds = [] } ! cmds
 
 
 updateCurTime : Time -> Model -> Model
@@ -336,7 +342,7 @@ updateCurTime timeDelta ({ curTime } as model) =
 
 
 spawnEnemies : Model -> Model
-spawnEnemies ({ enemies, qEnemies, curTime } as model) =
+spawnEnemies ({ enemies, qEnemies, curTime, cmds } as model) =
     case qEnemies of
         [] ->
             model
@@ -347,6 +353,7 @@ spawnEnemies ({ enemies, qEnemies, curTime } as model) =
                     { model
                         | enemies = enemy :: enemies
                         , qEnemies = tail
+                        , cmds = playWav "crab-hello" :: cmds
                     }
             else
                 model
@@ -358,7 +365,7 @@ moveEnemies timeDelta ({ enemies, config, egg } as model) =
 
 
 collideHeroAndEnemies : Model -> Model
-collideHeroAndEnemies ({ config, egg, hero, enemies, curTime } as model) =
+collideHeroAndEnemies ({ config, egg, hero, enemies, curTime, cmds } as model) =
     let
         ( newEnemies, didCollide ) =
             enemies
@@ -376,7 +383,15 @@ collideHeroAndEnemies ({ config, egg, hero, enemies, curTime } as model) =
             else
                 hero
     in
-    { model | enemies = newEnemies, hero = newHero }
+    { model
+        | enemies = newEnemies
+        , hero = newHero
+        , cmds =
+            if didCollide then
+                playWav "crab-death" :: cmds
+            else
+                cmds
+    }
 
 
 removeDeadEnemies : Model -> Model

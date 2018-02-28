@@ -89,15 +89,15 @@ renderSidebar model =
                 ]
             , tr [ class "group" ]
                 [ td [ class "label" ] [ text "Score" ]
-                , td [ class "val" ] [ text "123" ]
+                , td [ class "val" ] [ formatNum 1024 |> text ]
                 ]
             , tr [ class "group" ]
                 [ td [ class "label" ] [ text "Eggs left" ]
-                , td [ class "val" ] [ text "12" ]
+                , td [ class "val" ] [ formatNum 12 |> text ]
                 ]
             , tr [ class "group" ]
                 [ td [ class "label" ] [ text "Kaiju Meter" ]
-                , td [ class "val" ] [ text "82/100" ]
+                , td [ class "val" ] [ text "82/1OO" ]
                 ]
             ]
         ]
@@ -113,13 +113,13 @@ viewTime time =
             (time |> Time.inSeconds) - (toFloat minutes * 60) |> floor
 
         minutesStr =
-            minutes |> toString
+            minutes |> formatNum
 
         secondsStr =
             if seconds < 10 then
-                "0" ++ (seconds |> toString)
+                "0" ++ (seconds |> formatNum)
             else
-                seconds |> toString
+                seconds |> formatNum
     in
     minutesStr ++ ":" ++ secondsStr
 
@@ -590,3 +590,18 @@ viewGameOver isGameOver =
 px : number -> String
 px num =
     toString num ++ "px"
+
+
+formatNum : number -> String
+formatNum num =
+    -- monospace numbers zeroes have dots in them,
+    -- so replace zeroes with letter Os
+    num
+        |> toString
+        |> String.map
+            (\c ->
+                if c == '0' then
+                    'O'
+                else
+                    c
+            )

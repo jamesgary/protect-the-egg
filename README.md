@@ -58,20 +58,31 @@ Day 25
 
 Day 26
 - [x] Art!
+- [x] Sound!
+
+Day 27
+- [ ] Start Screen
+- [ ] Onboarding/Tutorial
+- [ ] Victory
+- [ ] Music
+- [ ] Better game over (restart)
 
 Next steps:
 - [ ] C-C-C-COMBOS
 
 Future steps:
 - [ ] Juice!
-- [ ] Start Screen
 - [ ] Actual Level
-- [ ] Onboarding/Tutorial
-- [ ] Sound
-- [ ] Music
 - [ ] Benchmark
 - [ ] Quadtrees
 - [ ] Save progress
+
+### Credits
+
+Sounds: https://www.bfxr.net
+Textures: https://transparenttextures.com
+Audio API: https://howlerjs.com
+Sprite Maker: http://draeton.github.io/stitches
 
 ### Random notes
 
