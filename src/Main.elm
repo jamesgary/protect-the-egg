@@ -36,23 +36,6 @@ enemyStartingDistFromEgg =
     150
 
 
-enemyGenerator : Random.Generator Enemy
-enemyGenerator =
-    Random.float 0 (turns 1)
-        |> Random.map
-            (\angle ->
-                fromPolar ( enemyStartingDistFromEgg, angle )
-                    |> (\( x, y ) ->
-                            { pos = V2.fromTuple ( x, y )
-                            , lastPos = V2.fromTuple ( x, y )
-                            , rad = 2
-                            , state = Alive
-                            , seed = Random.initialSeed (round (angle * toFloat Random.maxInt))
-                            }
-                       )
-            )
-
-
 clusterGenerator : Config -> Random.Generator (List Enemy)
 clusterGenerator { enemyClusterSize } =
     Random.float 0 (turns 1)
@@ -68,6 +51,7 @@ clusterGenerator { enemyClusterSize } =
                                         , rad = 2
                                         , state = Alive
                                         , seed = Random.initialSeed (round (angle * toFloat Random.maxInt * toFloat i))
+                                        , lastAteAt = 0
                                         }
                                    )
                         )
@@ -340,6 +324,7 @@ tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos
         |> moveEnemies timeDelta
         |> collideHeroAndEnemies
         |> removeDeadEnemies
+        |> eatEggs
         |> checkGameOver
         |> cmdify
 
@@ -415,14 +400,31 @@ removeDeadEnemies ({ enemies, config, curTime } as model) =
     { model | enemies = List.filter (isAlive config curTime) enemies }
 
 
-checkGameOver : Model -> Model
-checkGameOver ({ egg, enemies } as model) =
-    { model
-        | isGameOver =
-            List.any (doesCollideWithEgg egg) enemies
+munchTime =
+    1000
 
-        --|> always False
-    }
+
+eatEggs : Model -> Model
+eatEggs ({ egg, enemies, curTime, numEggs } as model) =
+    enemies
+        |> List.map
+            (\quab ->
+                if doesCollideWithNest quab && (quab.lastAteAt + munchTime < curTime) then
+                    ( { quab | lastAteAt = curTime }, True )
+                else
+                    ( quab, False )
+            )
+        |> (\enemiesAndDidEat ->
+                { model
+                    | enemies = List.map Tuple.first enemiesAndDidEat
+                    , numEggs = numEggs - (enemiesAndDidEat |> List.filter Tuple.second |> List.length)
+                }
+           )
+
+
+checkGameOver : Model -> Model
+checkGameOver ({ numEggs } as model) =
+    { model | isGameOver = numEggs <= 0 }
 
 
 
@@ -478,11 +480,19 @@ isAlive config curTime enemy =
             expTime > curTime
 
 
-doesCollideWithEgg : Egg -> Enemy -> Bool
-doesCollideWithEgg egg enemy =
+eggPos =
+    V2.fromTuple ( 0, 0 )
+
+
+eggRad =
+    10
+
+
+doesCollideWithNest : Enemy -> Bool
+doesCollideWithNest enemy =
     case enemy.state of
         Alive ->
-            Math.dist egg.pos enemy.pos < (egg.rad + enemy.rad)
+            Math.dist eggPos enemy.pos < (eggRad + enemy.rad)
 
         _ ->
             False
@@ -545,21 +555,24 @@ moveEnemyCloserToEgg : Config -> Time -> Egg -> Enemy -> Enemy
 moveEnemyCloserToEgg config timeDelta egg enemy =
     case enemy.state of
         Alive ->
-            let
-                ( eggX, eggY ) =
-                    V2.toTuple egg.pos
+            if doesCollideWithNest enemy then
+                enemy
+            else
+                let
+                    ( eggX, eggY ) =
+                        V2.toTuple egg.pos
 
-                ( enemyX, enemyY ) =
-                    V2.toTuple enemy.pos
-            in
-            toPolar ( eggX - enemyX, eggY - enemyY )
-                |> (\( _, angle ) -> fromPolar ( timeDelta * config.enemySpeed * baseSpeed, angle ))
-                |> (\( x, y ) ->
-                        { enemy
-                            | pos = V2.fromTuple ( enemyX + x, enemyY + y )
-                            , lastPos = enemy.pos
-                        }
-                   )
+                    ( enemyX, enemyY ) =
+                        V2.toTuple enemy.pos
+                in
+                toPolar ( eggX - enemyX, eggY - enemyY )
+                    |> (\( _, angle ) -> fromPolar ( timeDelta * config.enemySpeed * baseSpeed, angle ))
+                    |> (\( x, y ) ->
+                            { enemy
+                                | pos = V2.fromTuple ( enemyX + x, enemyY + y )
+                                , lastPos = enemy.pos
+                            }
+                       )
 
         Bouncing angle ->
             { enemy

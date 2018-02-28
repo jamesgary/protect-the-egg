@@ -49,10 +49,10 @@ init { viewportWidth, viewportHeight, timestamp } =
     , curTime = 0
     , timeUntilHatch = 2 * 60 * 1000 -- TWO MINUTES TO MIIIIIDNIIIIGHT
     , config =
-        { isPaused = True
+        { isPaused = False
         , heroLength = 20
         , heroThickness = 5
-        , enemySpeed = 1
+        , enemySpeed = 3
         , enemySpawnRate = 0.5
         , enemyClusterSize = 3
         }
@@ -61,6 +61,7 @@ init { viewportWidth, viewportHeight, timestamp } =
     , resources = Resources.init
     , cmds = []
     , kaiju = 0
+    , numEggs = 12
     }
         ! [ Resources.loadTextures [ "images/crab-spritesheet.png" ]
                 |> Cmd.map Resources
@@ -152,6 +153,7 @@ initCluster seed timeToSpawn numEnemies angle =
                   , rad = 2
                   , state = Alive
                   , seed = seed
+                  , lastAteAt = 0
                   }
                 )
             )
@@ -178,6 +180,7 @@ initEnemies ( viewportWidth, viewportHeight ) seed =
                             , rad = 2
                             , state = Alive
                             , seed = seed
+                            , lastAteAt = 0
                             }
                         )
             )

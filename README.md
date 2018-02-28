@@ -65,6 +65,7 @@ Day 27
 - [x] Durdle stays on the beach
 - [x] Increase kaiju after quab hit
 - [x] Kaiju progress bar
+- [x] Quabs slowly munch on eggs
 - [ ] Start Screen
 - [ ] Onboarding/Tutorial
 - [ ] Victory
@@ -81,10 +82,10 @@ Future steps:
 
 ### Credits
 
-Sounds: https://www.bfxr.net
-Textures: https://transparenttextures.com
-Audio API: https://howlerjs.com
-Sprite Maker: http://draeton.github.io/stitches
+- Sounds: https://www.bfxr.net
+- Textures: https://transparenttextures.com
+- Audio API: https://howlerjs.com
+- Sprite Maker: http://draeton.github.io/stitches
 
 ### Random notes
 
@@ -148,7 +149,7 @@ Computer stuff:
   - Pause/options
   - Time until hatch
   - Score
-  - # eggs left
+  - num eggs left
   - Kaiju meter
 - Onboarding (?)
 - Music (surf rock from FMA)

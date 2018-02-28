@@ -28,6 +28,7 @@ type alias Model =
     , resources : Resources
     , cmds : List (Cmd Msg)
     , kaiju : Int
+    , numEggs : Int
     }
 
 
@@ -77,6 +78,7 @@ type alias Enemy =
     , rad : Float
     , state : EnemyState
     , seed : Random.Seed
+    , lastAteAt : Time
     }
 
 

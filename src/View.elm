@@ -72,7 +72,7 @@ renderTextEffects ({ enemies } as model) =
 
 
 renderSidebar : Model -> Html Msg
-renderSidebar ({ sidebarWidth, timeUntilHatch, curTime, kaiju, config } as model) =
+renderSidebar ({ sidebarWidth, timeUntilHatch, curTime, kaiju, config, numEggs } as model) =
     div [ class "sidebar", style [ ( "width", px sidebarWidth ) ] ]
         [ div [ class "pause-btn", onClick TogglePause ]
             [ text
@@ -87,13 +87,14 @@ renderSidebar ({ sidebarWidth, timeUntilHatch, curTime, kaiju, config } as model
                 [ td [ class "label" ] [ text "Time until hatch:" ]
                 , td [ class "val" ] [ text (viewTime (timeUntilHatch - curTime)) ]
                 ]
-            , tr [ class "group" ]
-                [ td [ class "label" ] [ text "Score" ]
-                , td [ class "val" ] [ formatNum 1024 |> text ]
-                ]
+
+            --, tr [ class "group" ]
+            --    [ td [ class "label" ] [ text "Score" ]
+            --    , td [ class "val" ] [ formatNum 1024 |> text ]
+            --    ]
             , tr [ class "group" ]
                 [ td [ class "label" ] [ text "Eggs left" ]
-                , td [ class "val" ] [ formatNum 12 |> text ]
+                , td [ class "val" ] [ formatNum numEggs |> text ]
                 ]
             , tr [ class "group" ]
                 [ td [ class "label" ] [ text "Kaiju Meter" ]
