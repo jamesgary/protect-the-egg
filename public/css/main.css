@@ -80,6 +80,20 @@ canvas {
   font-family: 'Source Code Pro', monospace;
 }
 
+.kaiju-container {
+  width: 100%;
+  padding: 4px;
+  background: rgba(0,0,0,0.8);
+  border-radius: 6px;
+}
+
+.kaiju {
+  height: 15px;
+  background: rgb(28, 205, 255);
+  border-radius: 2px;
+  box-shadow: 0 0 2px 0px rgba(210, 255, 255, 0.9);
+}
+
 .game-over-container {
   width: 100%;
   height: 100%;

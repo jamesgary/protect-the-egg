@@ -64,6 +64,7 @@ Day 27
 - [x] Durdle goes around nest
 - [x] Durdle stays on the beach
 - [x] Increase kaiju after quab hit
+- [x] Kaiju progress bar
 - [ ] Start Screen
 - [ ] Onboarding/Tutorial
 - [ ] Victory

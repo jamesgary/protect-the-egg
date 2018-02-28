@@ -11,7 +11,7 @@ import Game.TwoD as Game
 import Game.TwoD.Camera as Camera exposing (Camera)
 import Game.TwoD.Render as Render exposing (Renderable, circle, customFragment, rectangle, ring)
 import Html exposing (Html, br, dd, div, dl, dt, h1, h2, input, label, p, span, table, td, text, tr)
-import Html.Attributes exposing (checked, class, defaultValue, style, type_)
+import Html.Attributes exposing (checked, class, defaultValue, style, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Math.Vector2 as V2 exposing (Vec2)
 import Random
@@ -97,9 +97,20 @@ renderSidebar ({ sidebarWidth, timeUntilHatch, curTime, kaiju, config } as model
                 ]
             , tr [ class "group" ]
                 [ td [ class "label" ] [ text "Kaiju Meter" ]
-                , td [ class "val" ] [ formatNum kaiju ++ "/1OO" |> text ]
+                , td [ class "val" ] [ renderKaiju kaiju ]
                 ]
             ]
+        ]
+
+
+renderKaiju : Int -> Html Msg
+renderKaiju kaiju =
+    div [ class "kaiju-container" ]
+        [ div
+            [ class "kaiju"
+            , style [ ( "width", (min kaiju 100 |> toString) ++ "%" ) ]
+            ]
+            []
         ]
 
 
