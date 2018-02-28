@@ -1,8 +1,35 @@
-# Safety Game
+# Protect Your Eggs!
 
 Play the work in progress here: http://elm-game-jam-feb-2017.s3-website-us-east-1.amazonaws.com
 
-Protect egg!
+### Credits
+
+- Sounds: https://www.bfxr.net
+- Textures: https://transparenttextures.com
+- Audio API: https://howlerjs.com
+- Sprite Maker: http://draeton.github.io/stitches
+
+### To do
+
+- Tiny things
+  - Mute for sound/music
+  - Refactor!
+  - More interesting level
+  - Balance sound
+  - Glow kaiju meter when in use
+- Tiny bugfixes
+  - Random seeds aren't getting cycled correctly
+  - Durdle -> Kaiju transition is a bit wonky
+- Future (big) steps
+  - C-C-C-COMBOS
+  - Pirates shooting bouncing bullets
+  - Juice!
+  - Actual Level
+  - Benchmark
+  - Quadtrees
+  - Save progress
+
+### Changelog
 
 Day 1
 - [x] Draw egg (just a cirlce)
@@ -71,21 +98,6 @@ Day 27
 - [x] Victory
 - [x] Better game over (restart)
 - [x] Onboarding/Tutorial
-
-Future steps:
-- [ ] C-C-C-COMBOS
-- [ ] Juice!
-- [ ] Actual Level
-- [ ] Benchmark
-- [ ] Quadtrees
-- [ ] Save progress
-
-### Credits
-
-- Sounds: https://www.bfxr.net
-- Textures: https://transparenttextures.com
-- Audio API: https://howlerjs.com
-- Sprite Maker: http://draeton.github.io/stitches
 
 ### Random notes
 
@@ -182,8 +194,3 @@ Still to decide
 Maybe level progression:
 - Just crabs, different colors, intro to kaiju, bg is all sand
 - Zoom out, see shore, introduce pirates
-
-Quabs are chomping at the bit for your eggs!
-Smash them away with your shell!
-The more quabs you smash, the more your Kaiju meter increases!
-Click to unleash your Kaiju rage!
