@@ -28,6 +28,9 @@
       var soundNames = [
         "crab-death.wav",
         "crab-hello.wav",
+        "egg-eat.wav",
+        "defeat.wav",
+        "victory.wav",
         "pharaos.mp3",
       ];
       var soundSrcs = {};
@@ -58,8 +61,14 @@
         soundSrcs["pharaos.mp3"].pause();
       });
 
-      app.ports.stopSong.subscribe(function() {
+      app.ports.victory.subscribe(function() {
         soundSrcs["pharaos.mp3"].stop();
+        soundSrcs["victory.wav"].play();
+      });
+
+      app.ports.gameOver.subscribe(function() {
+        soundSrcs["pharaos.mp3"].stop();
+        soundSrcs["defeat.wav"].play();
       });
     </script>
   </body>

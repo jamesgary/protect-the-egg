@@ -9,7 +9,7 @@ import Html
 import Init exposing (init, tryAgain)
 import Math
 import Math.Vector2 as V2 exposing (Vec2)
-import Ports exposing (pauseSong, playSong, playWav, stopSong, windowChanged)
+import Ports exposing (gameOver, pauseSong, playSong, playWav, victory, windowChanged)
 import Random
 import Time exposing (Time)
 import View exposing (view)
@@ -456,7 +456,7 @@ munchTime =
 
 
 eatEggs : Model -> Model
-eatEggs ({ egg, enemies, curTime, numEggs } as model) =
+eatEggs ({ egg, enemies, curTime, numEggs, cmds } as model) =
     enemies
         |> List.map
             (\quab ->
@@ -466,9 +466,18 @@ eatEggs ({ egg, enemies, curTime, numEggs } as model) =
                     ( quab, False )
             )
         |> (\enemiesAndDidEat ->
+                let
+                    numEggsEaten =
+                        enemiesAndDidEat |> List.filter Tuple.second |> List.length
+                in
                 { model
                     | enemies = List.map Tuple.first enemiesAndDidEat
-                    , numEggs = numEggs - (enemiesAndDidEat |> List.filter Tuple.second |> List.length)
+                    , numEggs = numEggs - numEggsEaten
+                    , cmds =
+                        if numEggsEaten > 0 then
+                            playWav "egg-eat.wav" :: cmds
+                        else
+                            cmds
                 }
            )
 
@@ -480,7 +489,7 @@ checkGameOver ({ numEggs, cmds } as model) =
     else
         { model
             | state = GameOver
-            , cmds = stopSong () :: cmds
+            , cmds = gameOver () :: cmds
         }
 
 
@@ -489,7 +498,7 @@ checkVictory ({ curTime, cmds } as model) =
     if curTime < timeUntilHatch then
         model
     else
-        { model | state = Victory, cmds = stopSong () :: cmds }
+        { model | state = Victory, cmds = victory () :: cmds }
 
 
 

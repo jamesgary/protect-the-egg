@@ -15,4 +15,7 @@ port playSong : () -> Cmd msg
 port pauseSong : () -> Cmd msg
 
 
-port stopSong : () -> Cmd msg
+port gameOver : () -> Cmd msg
+
+
+port victory : () -> Cmd msg
