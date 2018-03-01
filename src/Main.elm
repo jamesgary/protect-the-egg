@@ -322,7 +322,7 @@ moveDurdle timeDelta ({ config, durdle, mousePos } as model) =
 
 
 tick : Time -> Model -> ( Model, Cmd Msg )
-tick timeDelta ({ config, quabs, durdle, seed, mousePos } as model) =
+tick timeDelta model =
     model
         |> updateCurTime timeDelta
         |> exhaustKaiju timeDelta
