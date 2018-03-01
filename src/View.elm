@@ -36,14 +36,10 @@ colors =
 
 
 view : Model -> Html Msg
-view ({ durdle, quabs, config, curTime, canvasSize, resources, state, viewportWidth, viewportHeight, isStartBtnHovered, effects, numEggs } as model) =
+view ({ durdle, quabs, config, curTime, canvasSize, resources, state, viewportWidth, viewportHeight, isStartBtnHovered, effects, numEggs, sidebarWidth } as model) =
     div [ class "container" ]
         (case state of
             Start ->
-                let
-                    ( canvasSize, sidebarWidth ) =
-                        getDims viewportWidth viewportHeight
-                in
                 [ div
                     [ class
                         ("start-container"

@@ -137,37 +137,6 @@ type Msg
     | ChangeQuabClusterSize String
 
 
-getDurdleSweepQuadPoints : Config -> Durdle -> ( Vec2, Vec2, Vec2, Vec2 )
-getDurdleSweepQuadPoints { durdleLength } { pos, lastPos, length, angle, lastAngle } =
-    let
-        ( rotOffsetX, rotOffsetY ) =
-            fromPolar ( durdleLength * length / 2, angle )
-
-        ( rotOffsetXLast, rotOffsetYLast ) =
-            fromPolar ( durdleLength * length / 2, lastAngle )
-
-        ( x, y ) =
-            V2.toTuple pos
-
-        ( lastX, lastY ) =
-            V2.toTuple lastPos
-
-        -- assuming width is longer than height...
-        a =
-            V2.fromTuple ( x - rotOffsetX, y - rotOffsetY )
-
-        b =
-            V2.fromTuple ( x + rotOffsetX, y + rotOffsetY )
-
-        c =
-            V2.fromTuple ( lastX + rotOffsetXLast, lastY + rotOffsetYLast )
-
-        d =
-            V2.fromTuple ( lastX - rotOffsetXLast, lastY - rotOffsetYLast )
-    in
-    ( a, b, c, d )
-
-
 
 -- config applications
 
