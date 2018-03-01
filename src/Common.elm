@@ -10,25 +10,30 @@ import Time exposing (Time)
 
 
 type alias Model =
-    { viewportWidth : Int
+    { durdle : Durdle
+    , quabs : List Quab
+    , qQuabs : List ( Time, Quab ) -- queued quabs
+    , numEggs : Int
+    , kaiju : Float
+    , state : GameState
+
+    -- game meta logic
+    , curTime : Time
+    , mousePos : Vec2
+    , seed : Random.Seed
+    , config : Config
+
+    -- view logic
+    , viewportWidth : Int
     , viewportHeight : Int
     , canvasSize : Int
     , sidebarWidth : Int
-    , durdle : Durdle
-    , quabs : List Quab
-    , seed : Random.Seed
-    , timeSinceLastSpawn : Time
-    , curTime : Time
-    , config : Config
-    , mousePos : Vec2
-    , qQuabs : List ( Time, Quab ) -- queued quabs
     , resources : Resources
-    , cmds : List (Cmd Msg)
-    , kaiju : Float
-    , numEggs : Int
-    , state : GameState
     , isStartBtnHovered : Bool
     , effects : List Effect
+
+    -- other
+    , cmds : List (Cmd Msg)
     }
 
 
@@ -82,7 +87,7 @@ type alias Durdle =
 
 type DurdleState
     = Shield
-    | Sword
+    | Sword -- aka KAIJU
 
 
 type alias Quab =
@@ -111,21 +116,25 @@ explosionLongevity =
 
 
 type Msg
-    = MouseMove Mouse.Point
+    = -- user actions
+      MouseMove Mouse.Point
     | MouseClick Mouse.Point
-    | Tick Time
     | TogglePause
+    | WindowChanged ( Int, Int )
+    | StartGame
+    | TryAgain
+      -- start screen
+    | MouseOnStartBtn
+    | MouseOutStartBtn
+      -- non-user actions
+    | Tick Time
+    | Resources Resources.Msg
+      -- config stuff
     | ChangeDurdleLength String
     | ChangeDurdleThickness String
     | ChangeQuabSpawnRate String
     | ChangeQuabSpeed String
     | ChangeQuabClusterSize String
-    | WindowChanged ( Int, Int )
-    | Resources Resources.Msg
-    | MouseOnStartBtn
-    | MouseOutStartBtn
-    | StartGame
-    | TryAgain
 
 
 getDurdleSweepQuadPoints : Config -> Durdle -> ( Vec2, Vec2, Vec2, Vec2 )

@@ -39,7 +39,6 @@ init { viewportWidth, viewportHeight, timestamp } =
         }
     , quabs = quabs
     , seed = newSeed
-    , timeSinceLastSpawn = 0
     , curTime = 0
     , config =
         { durdleLength = 20
@@ -72,7 +71,6 @@ tryAgain ({ durdle, seed, viewportWidth, viewportHeight } as model) =
     { model
         | durdle = { durdle | state = Shield }
         , quabs = []
-        , timeSinceLastSpawn = 0
         , curTime = 0
         , qQuabs = initQueuedQuabs ( viewportWidth, viewportHeight ) seed
         , kaiju = 0
