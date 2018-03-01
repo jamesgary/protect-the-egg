@@ -2,7 +2,7 @@ module Common exposing (..)
 
 import ElementRelativeMouseEvents as Mouse
 import Game.Resources as Resources exposing (Resources)
-import Game.TwoD.Camera as Camera exposing (Camera)
+import Game.TwoD.Camera as Camera
 import Math.Vector2 as V2 exposing (Vec2)
 import Mouse
 import Random
@@ -28,7 +28,6 @@ type alias Model =
     , numEggs : Int
     , state : GameState
     , isStartBtnHovered : Bool
-    , isMuted : Bool -- TODO: use me!
     , effects : List Effect
     }
 
@@ -130,7 +129,7 @@ type Msg
 
 
 getHeroSweepQuadPoints : Config -> Hero -> ( Vec2, Vec2, Vec2, Vec2 )
-getHeroSweepQuadPoints { heroLength, heroThickness } { pos, lastPos, length, angle, lastAngle } =
+getHeroSweepQuadPoints { heroLength } { pos, lastPos, length, angle, lastAngle } =
     let
         ( rotOffsetX, rotOffsetY ) =
             fromPolar ( heroLength * length / 2, angle )

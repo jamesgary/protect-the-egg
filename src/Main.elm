@@ -65,7 +65,7 @@ toggleState ({ state, angle } as hero) =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ viewportWidth, viewportHeight, hero, config, state } as model) =
+update msg ({ hero, config, state } as model) =
     case msg of
         MouseClick mousePos ->
             { model
@@ -183,13 +183,13 @@ trueMousePos { viewportWidth, viewportHeight } { x, y } =
         h =
             toFloat viewportHeight
 
-        ( innerWidth, innerHeight, xOffset, yOffset ) =
+        ( innerWidth, innerHeight ) =
             if w - h > 0 then
                 -- too wide!
-                ( h, h, w - h, 0 )
+                ( h, h )
             else
                 -- too tall!
-                ( w, w, 0, h - w )
+                ( w, w )
     in
     viewportToGameCoordinates
         camera
@@ -242,8 +242,8 @@ vTolerance =
     0.01
 
 
-moveHilt : Config -> Time -> Vec2 -> Vec2 -> Vec2 -> ( Vec2, Vec2 )
-moveHilt config timeDelta oldPos oldVel targetPos =
+moveHilt : Time -> Vec2 -> Vec2 -> Vec2 -> ( Vec2, Vec2 )
+moveHilt timeDelta oldPos oldVel targetPos =
     -- From https://github.com/mdgriffith/elm-style-animation/blob/
     -- 86f81b0f5a28289894fe61c14fa2c34c0bf895ec/src/Animation/Model.elm#L1591-L1623
     let
@@ -281,7 +281,7 @@ moveHero timeDelta ({ config, hero, mousePos } as model) =
             hiltPosFromHero config hero
 
         ( newHiltPos, newVel ) =
-            moveHilt config timeDelta hiltPos hero.vel mousePos
+            moveHilt timeDelta hiltPos hero.vel mousePos
 
         aroundNestPos =
             newHiltPos

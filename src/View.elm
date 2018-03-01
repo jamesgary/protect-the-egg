@@ -215,66 +215,6 @@ renderCenteredWithAlias { time, size, camera } renderables =
         (List.map (Render.toWebGl time camera ( wf, hf )) renderables)
 
 
-viewConfig : Config -> Html Msg
-viewConfig { heroLength, heroThickness, enemySpeed, enemySpawnRate, enemyClusterSize } =
-    div [ class "config" ]
-        [ h2 [] [ text "Config" ]
-        , configInput "Hero Length" heroLength ChangeHeroLength
-        , configInput "Hero Thickness" heroThickness ChangeHeroThickness
-        , configInput "Enemy Speed" enemySpeed ChangeEnemySpeed
-        , configInput "Enemy Spawn/s Rate" enemySpawnRate ChangeEnemySpawnRate
-        , configInput "Enemy Cluster Size" enemyClusterSize ChangeEnemyClusterSize
-        ]
-
-
-configCheckbox : String -> Bool -> Msg -> Html Msg
-configCheckbox title isChecked msg =
-    div [ class "config-item" ]
-        [ label []
-            [ text title
-            , input
-                [ type_ "checkbox"
-                , checked isChecked
-                , onClick msg
-                ]
-                []
-            ]
-        ]
-
-
-configInput : String -> number -> (String -> Msg) -> Html Msg
-configInput title val msg =
-    div [ class "config-item" ]
-        [ label []
-            [ text title
-            , input
-                [ defaultValue (toString val)
-                , onInput msg
-                ]
-                []
-            ]
-        ]
-
-
-viewBg : Model -> List Renderable
-viewBg { viewportWidth, viewportHeight } =
-    [ viewShape colors.oceanBlue
-        (Rect
-            { pos = V2.fromTuple ( 0, 0 )
-            , width = toFloat viewportWidth
-            , height = toFloat viewportHeight
-            , angle = 0
-            }
-        )
-    , viewShape colors.beachBg
-        (Circle
-            { pos = V2.fromTuple ( 0, 0 )
-            , rad = 0.07 * toFloat viewportHeight -- wat
-            }
-        )
-    ]
-
-
 eggPosList =
     [ ( -0.9, -1.5 )
     , ( 0.5, 1.2 )

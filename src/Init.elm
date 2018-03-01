@@ -2,7 +2,7 @@ module Init exposing (init, tryAgain)
 
 import Common exposing (..)
 import Game.Resources as Resources exposing (Resources)
-import Math.Vector2 as V2 exposing (Vec2)
+import Math.Vector2 as V2
 import Random
 import Time exposing (Time)
 
@@ -57,7 +57,6 @@ init { viewportWidth, viewportHeight, timestamp } =
     , numEggs = 12
     , state = Start
     , isStartBtnHovered = False
-    , isMuted = True
     , effects = []
     }
         ! [ Resources.loadTextures
