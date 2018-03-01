@@ -203,11 +203,8 @@ initCluster seed timeToSpawn numEnemies angle =
                     timeBetween =
                         600
 
-                    distFromEggToSpawn =
-                        quabSpawnDist
-
                     pos =
-                        ( distFromEggToSpawn, angle )
+                        ( quabSpawnDist, angle )
                             |> fromPolar
                             |> V2.fromTuple
                 in

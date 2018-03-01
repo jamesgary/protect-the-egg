@@ -69,12 +69,6 @@ type alias Flag =
     }
 
 
-type alias Egg =
-    { pos : Vec2
-    , rad : Float
-    }
-
-
 type alias Hero =
     { state : HeroState
     , pos : Vec2
@@ -238,9 +232,9 @@ timeUntilHatch =
     93 * 1000
 
 
-eggPos =
-    ( 0, 0 )
+nestPos =
+    V2.fromTuple ( 0, 0 )
 
 
-eggRad =
-    3
+enemyStartingDistFromNest =
+    150

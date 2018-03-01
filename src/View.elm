@@ -3,7 +3,6 @@ module View exposing (view)
 import Array
 import Color exposing (Color)
 import Common exposing (..)
-import Config
 import Ease
 import ElementRelativeMouseEvents as Mouse
 import Game.Resources as Resources exposing (Resources)
@@ -274,10 +273,6 @@ viewBg { viewportWidth, viewportHeight } =
             }
         )
     ]
-
-
-nestPos =
-    V2.fromTuple ( 0, 0 )
 
 
 eggPosList =
@@ -705,22 +700,6 @@ viewTransparentCircle color pos rad =
         , rotation = 0
         , pivot = ( 0.5, 0.5 )
         }
-
-
-
---testRenderable : Renderable
---testRenderable =
---    veryCustom
---        (\{ camera, screenSize, time } ->
---            WebGL.entity
---                myVert
---                myFrag
---                Shapes.unitSquare
---                { u_crazyFrog = frogTexture
---                , transform = Shaders.makeTransform ( x, y, z ) 0 ( 2, 4 ) ( 0, 0 )
---                , cameraProj = Camera.view camera screenSize
---                }
---        )
 
 
 frag =

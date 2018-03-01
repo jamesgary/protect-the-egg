@@ -32,10 +32,6 @@ enemySpeed =
     0.02
 
 
-enemyStartingDistFromEgg =
-    150
-
-
 clusterGenerator : Config -> Random.Generator (List Enemy)
 clusterGenerator { enemyClusterSize } =
     Random.float 0 (turns 1)
@@ -44,7 +40,7 @@ clusterGenerator { enemyClusterSize } =
                 List.range 0 (enemyClusterSize - 1)
                     |> List.map
                         (\i ->
-                            fromPolar ( enemyStartingDistFromEgg + (5 * toFloat i), angle )
+                            fromPolar ( enemyStartingDistFromNest + (5 * toFloat i), angle )
                                 |> (\( x, y ) ->
                                         { pos = V2.fromTuple ( x, y )
                                         , lastPos = V2.fromTuple ( x, y )
@@ -287,16 +283,16 @@ moveHero timeDelta ({ config, hero, mousePos } as model) =
         ( newHiltPos, newVel ) =
             moveHilt config timeDelta hiltPos hero.vel mousePos
 
-        aroundEggPos =
+        aroundNestPos =
             newHiltPos
-                |> V2.distance eggPos
+                |> V2.distance nestPos
                 |> (\d ->
                         if d < nestRad then
-                            V2.direction newHiltPos eggPos
+                            V2.direction newHiltPos nestPos
                                 |> V2.normalize
                                 |> V2.scale nestRad
                         else if d > beachRad then
-                            V2.direction newHiltPos eggPos
+                            V2.direction newHiltPos nestPos
                                 |> V2.normalize
                                 |> V2.scale beachRad
                         else
@@ -306,7 +302,7 @@ moveHero timeDelta ({ config, hero, mousePos } as model) =
         angle =
             case hero.state of
                 Shield ->
-                    V2.sub eggPos aroundEggPos
+                    V2.sub nestPos aroundNestPos
                         |> V2.toTuple
                         |> toPolar
                         |> (\( _, angle ) ->
@@ -314,7 +310,7 @@ moveHero timeDelta ({ config, hero, mousePos } as model) =
                            )
 
                 Sword ->
-                    V2.sub eggPos aroundEggPos
+                    V2.sub nestPos aroundNestPos
                         |> V2.toTuple
                         |> toPolar
                         |> (\( _, angle ) ->
@@ -323,7 +319,7 @@ moveHero timeDelta ({ config, hero, mousePos } as model) =
 
         newHero =
             { hero
-                | pos = heroPosFromHilt config { hero | angle = angle } aroundEggPos
+                | pos = heroPosFromHilt config { hero | angle = angle } aroundNestPos
                 , lastPos = hero.pos
                 , vel = newVel
                 , angle = angle
@@ -410,7 +406,7 @@ spawnEnemies ({ enemies, qEnemies, curTime, effects, cmds } as model) =
 
 moveEnemies : Time -> Model -> Model
 moveEnemies timeDelta ({ enemies, config } as model) =
-    { model | enemies = List.map (moveEnemyCloserToEgg config timeDelta) enemies }
+    { model | enemies = List.map (moveEnemyCloserToNest config timeDelta) enemies }
 
 
 collideHeroAndEnemies : Model -> Model
@@ -515,19 +511,11 @@ isAlive config curTime enemy =
             expTime > curTime
 
 
-eggPos =
-    V2.fromTuple ( 0, 0 )
-
-
-eggRad =
-    10
-
-
 doesCollideWithNest : Enemy -> Bool
 doesCollideWithNest enemy =
     case enemy.state of
         Alive ->
-            Math.dist eggPos enemy.pos < (eggRad + enemy.rad)
+            Math.dist nestPos enemy.pos < (nestRad + enemy.rad)
 
         _ ->
             False
@@ -573,34 +561,34 @@ baseSpeed =
 bumpHero : Hero -> Hero
 bumpHero hero =
     let
-        ( eggX, eggY ) =
-            V2.toTuple eggPos
+        ( nestX, nestY ) =
+            V2.toTuple nestPos
 
         ( heroX, heroY ) =
             V2.toTuple hero.pos
     in
-    toPolar ( eggX - heroX, eggY - heroY )
+    toPolar ( nestX - heroX, nestY - heroY )
         |> (\( _, angle ) -> fromPolar ( 3, angle ))
         |> (\( x, y ) ->
                 { hero | pos = V2.fromTuple ( heroX + x, heroY + y ) }
            )
 
 
-moveEnemyCloserToEgg : Config -> Time -> Enemy -> Enemy
-moveEnemyCloserToEgg config timeDelta enemy =
+moveEnemyCloserToNest : Config -> Time -> Enemy -> Enemy
+moveEnemyCloserToNest config timeDelta enemy =
     case enemy.state of
         Alive ->
             if doesCollideWithNest enemy then
                 enemy
             else
                 let
-                    ( eggX, eggY ) =
-                        V2.toTuple eggPos
+                    ( nestX, nestY ) =
+                        V2.toTuple nestPos
 
                     ( enemyX, enemyY ) =
                         V2.toTuple enemy.pos
                 in
-                toPolar ( eggX - enemyX, eggY - enemyY )
+                toPolar ( nestX - enemyX, nestY - enemyY )
                     |> (\( _, angle ) -> fromPolar ( timeDelta * config.enemySpeed * baseSpeed, angle ))
                     |> (\( x, y ) ->
                             { enemy
