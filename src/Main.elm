@@ -278,7 +278,7 @@ moveHilt config timeDelta oldPos oldVel targetPos =
 
 
 moveHero : Time -> Model -> Model
-moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
+moveHero timeDelta ({ config, hero, mousePos } as model) =
     let
         -- hilt is the mouse-controllable point
         hiltPos =
@@ -289,14 +289,14 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
 
         aroundEggPos =
             newHiltPos
-                |> V2.distance egg.pos
+                |> V2.distance eggPos
                 |> (\d ->
                         if d < nestRad then
-                            V2.direction newHiltPos egg.pos
+                            V2.direction newHiltPos eggPos
                                 |> V2.normalize
                                 |> V2.scale nestRad
                         else if d > beachRad then
-                            V2.direction newHiltPos egg.pos
+                            V2.direction newHiltPos eggPos
                                 |> V2.normalize
                                 |> V2.scale beachRad
                         else
@@ -306,7 +306,7 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
         angle =
             case hero.state of
                 Shield ->
-                    V2.sub egg.pos aroundEggPos
+                    V2.sub eggPos aroundEggPos
                         |> V2.toTuple
                         |> toPolar
                         |> (\( _, angle ) ->
@@ -314,7 +314,7 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
                            )
 
                 Sword ->
-                    V2.sub egg.pos aroundEggPos
+                    V2.sub eggPos aroundEggPos
                         |> V2.toTuple
                         |> toPolar
                         |> (\( _, angle ) ->
@@ -334,7 +334,7 @@ moveHero timeDelta ({ config, hero, egg, mousePos } as model) =
 
 
 tick : Time -> Model -> ( Model, Cmd Msg )
-tick timeDelta ({ config, egg, enemies, hero, timeSinceLastSpawn, seed, mousePos } as model) =
+tick timeDelta ({ config, enemies, hero, timeSinceLastSpawn, seed, mousePos } as model) =
     model
         |> updateCurTime timeDelta
         |> exhaustKaiju timeDelta
@@ -409,12 +409,12 @@ spawnEnemies ({ enemies, qEnemies, curTime, effects, cmds } as model) =
 
 
 moveEnemies : Time -> Model -> Model
-moveEnemies timeDelta ({ enemies, config, egg } as model) =
-    { model | enemies = List.map (moveEnemyCloserToEgg config timeDelta egg) enemies }
+moveEnemies timeDelta ({ enemies, config } as model) =
+    { model | enemies = List.map (moveEnemyCloserToEgg config timeDelta) enemies }
 
 
 collideHeroAndEnemies : Model -> Model
-collideHeroAndEnemies ({ config, egg, hero, enemies, curTime, kaiju, cmds } as model) =
+collideHeroAndEnemies ({ config, hero, enemies, curTime, kaiju, cmds } as model) =
     let
         ( newEnemies, numCollidedEnemies ) =
             enemies
@@ -430,7 +430,7 @@ collideHeroAndEnemies ({ config, egg, hero, enemies, curTime, kaiju, cmds } as m
 
         newHero =
             if numCollidedEnemies > 0 then
-                bumpHero egg hero
+                bumpHero hero
             else
                 hero
     in
@@ -456,7 +456,7 @@ munchTime =
 
 
 eatEggs : Model -> Model
-eatEggs ({ egg, enemies, curTime, numEggs, cmds } as model) =
+eatEggs ({ enemies, curTime, numEggs, cmds } as model) =
     enemies
         |> List.map
             (\quab ->
@@ -499,45 +499,6 @@ checkVictory ({ curTime, cmds } as model) =
         model
     else
         { model | state = Victory, cmds = victory () :: cmds }
-
-
-
-{- -- FOR ENDLESS MODE?
-
-   -- SPAWN ENEMIES
-   timeToSpawn =
-       1000 / config.enemySpawnRate
-
-   numEnemiesToSpawnFloat =
-       (curTime - timeSinceLastSpawn) / timeToSpawn
-
-   numEnemiesToSpawnInt =
-       floor numEnemiesToSpawnFloat
-
-   timePassedSinceLastSpawn =
-       (numEnemiesToSpawnFloat - toFloat numEnemiesToSpawnInt) * timeToSpawn
-
-   ( ( spawnedEnemies, newSeed ), newTimeSinceLastSpawn ) =
-       if numEnemiesToSpawnInt >= 1 then
-           ( Random.step (Random.list numEnemiesToSpawnInt (clusterGenerator config)) seed
-           , curTime - timePassedSinceLastSpawn
-           )
-       else
-           ( ( [], seed ), timeSinceLastSpawn )
-
-   ( movedEnemies, didCollide ) =
-       enemies
-           |> List.append (spawnedEnemies |> List.concat)
-           |> List.map (moveEnemyCloserToEgg config timeDelta egg)
-           |> List.map (collideWithHero config curTime movedHero)
-           |> (\listOfEnemiesAndDidCollide ->
-                   ( listOfEnemiesAndDidCollide
-                       |> List.map Tuple.first
-                       |> List.filter (isAlive config curTime)
-                   , List.any Tuple.second listOfEnemiesAndDidCollide
-                   )
-              )
--}
 
 
 isAlive : Config -> Time -> Enemy -> Bool
@@ -609,11 +570,11 @@ baseSpeed =
     0.01
 
 
-bumpHero : Egg -> Hero -> Hero
-bumpHero egg hero =
+bumpHero : Hero -> Hero
+bumpHero hero =
     let
         ( eggX, eggY ) =
-            V2.toTuple egg.pos
+            V2.toTuple eggPos
 
         ( heroX, heroY ) =
             V2.toTuple hero.pos
@@ -625,8 +586,8 @@ bumpHero egg hero =
            )
 
 
-moveEnemyCloserToEgg : Config -> Time -> Egg -> Enemy -> Enemy
-moveEnemyCloserToEgg config timeDelta egg enemy =
+moveEnemyCloserToEgg : Config -> Time -> Enemy -> Enemy
+moveEnemyCloserToEgg config timeDelta enemy =
     case enemy.state of
         Alive ->
             if doesCollideWithNest enemy then
@@ -634,7 +595,7 @@ moveEnemyCloserToEgg config timeDelta egg enemy =
             else
                 let
                     ( eggX, eggY ) =
-                        V2.toTuple egg.pos
+                        V2.toTuple eggPos
 
                     ( enemyX, enemyY ) =
                         V2.toTuple enemy.pos

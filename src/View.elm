@@ -37,7 +37,7 @@ colors =
 
 
 view : Model -> Html Msg
-view ({ egg, hero, enemies, config, curTime, canvasSize, resources, state, viewportWidth, viewportHeight, isStartBtnHovered, effects, numEggs } as model) =
+view ({ hero, enemies, config, curTime, canvasSize, resources, state, viewportWidth, viewportHeight, isStartBtnHovered, effects, numEggs } as model) =
     div [ class "container" ]
         (case state of
             Start ->

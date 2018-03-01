@@ -14,7 +14,6 @@ type alias Model =
     , viewportHeight : Int
     , canvasSize : Int
     , sidebarWidth : Int
-    , egg : Egg
     , hero : Hero
     , enemies : List Enemy
     , seed : Random.Seed
@@ -237,3 +236,11 @@ splashLongevity =
 timeUntilHatch =
     -- Length of pharaos song
     93 * 1000
+
+
+eggPos =
+    ( 0, 0 )
+
+
+eggRad =
+    3

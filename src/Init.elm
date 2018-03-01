@@ -28,10 +28,6 @@ init { viewportWidth, viewportHeight, timestamp } =
     , viewportHeight = viewportHeight
     , sidebarWidth = sidebarWidth
     , canvasSize = canvasSize
-    , egg =
-        { pos = V2.fromTuple ( 0, 0 )
-        , rad = 3
-        }
     , hero =
         { state = Shield -- Sword
         , pos = startingPos
