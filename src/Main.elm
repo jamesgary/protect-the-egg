@@ -24,42 +24,6 @@ main =
         }
 
 
-quabSpeed =
-    0.02
-
-
-clusterGenerator : Config -> Random.Generator (List Quab)
-clusterGenerator { quabClusterSize } =
-    Random.float 0 (turns 1)
-        |> Random.map
-            (\angle ->
-                List.range 0 (quabClusterSize - 1)
-                    |> List.map
-                        (\i ->
-                            fromPolar ( quabStartingDistFromNest + (5 * toFloat i), angle )
-                                |> (\( x, y ) ->
-                                        { pos = V2.fromTuple ( x, y )
-                                        , lastPos = V2.fromTuple ( x, y )
-                                        , rad = 2
-                                        , state = Alive
-                                        , seed = Random.initialSeed (round (angle * toFloat Random.maxInt * toFloat i))
-                                        , lastAteAt = 0
-                                        }
-                                   )
-                        )
-            )
-
-
-toggleState : Durdle -> Durdle
-toggleState ({ state, angle } as durdle) =
-    case state of
-        Sword ->
-            { durdle | state = Shield, angle = angle - turns 0.25 }
-
-        Shield ->
-            { durdle | state = Sword, angle = angle + turns 0.25 }
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ durdle, config, state } as model) =
     case msg of
@@ -168,6 +132,38 @@ update msg ({ durdle, config, state } as model) =
 
         TryAgain ->
             tryAgain model ! [ playSong () ]
+
+
+clusterGenerator : Config -> Random.Generator (List Quab)
+clusterGenerator { quabClusterSize } =
+    Random.float 0 (turns 1)
+        |> Random.map
+            (\angle ->
+                List.range 0 (quabClusterSize - 1)
+                    |> List.map
+                        (\i ->
+                            fromPolar ( quabStartingDistFromNest + (5 * toFloat i), angle )
+                                |> (\( x, y ) ->
+                                        { pos = V2.fromTuple ( x, y )
+                                        , lastPos = V2.fromTuple ( x, y )
+                                        , rad = 2
+                                        , state = Alive
+                                        , seed = Random.initialSeed (round (angle * toFloat Random.maxInt * toFloat i))
+                                        , lastAteAt = 0
+                                        }
+                                   )
+                        )
+            )
+
+
+toggleState : Durdle -> Durdle
+toggleState ({ state, angle } as durdle) =
+    case state of
+        Sword ->
+            { durdle | state = Shield, angle = angle - turns 0.25 }
+
+        Shield ->
+            { durdle | state = Sword, angle = angle + turns 0.25 }
 
 
 trueMousePos : Model -> Mouse.Point -> Vec2
