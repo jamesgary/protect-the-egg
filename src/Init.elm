@@ -18,7 +18,6 @@ init { viewportWidth, viewportHeight, timestamp } =
             Random.initialSeed timestamp
 
         ( enemies, newSeed ) =
-            --initEnemies ( viewportWidth, viewportHeight ) seed
             ( [], seed )
 
         ( canvasSize, sidebarWidth ) =
@@ -29,7 +28,7 @@ init { viewportWidth, viewportHeight, timestamp } =
     , sidebarWidth = sidebarWidth
     , canvasSize = canvasSize
     , hero =
-        { state = Shield -- Sword
+        { state = Shield
         , pos = startingPos
         , lastPos = startingPos
         , length = 1
@@ -178,6 +177,8 @@ initQueuedEnemies ( viewportWidth, viewportHeight ) seed =
                 initCluster seed (wave6Time + 12000) 1 (top - (toFloat i * turns (1 / 6)))
             )
         |> List.concat
+
+    -- wave 7, singles spiraling in from all around!
     , List.range 0 48
         |> List.map
             (\i ->
@@ -187,10 +188,6 @@ initQueuedEnemies ( viewportWidth, viewportHeight ) seed =
     ]
         |> List.concat
         |> List.sortBy Tuple.first
-
-
-
--- wave 7, singles spiraling in from all around!
 
 
 initCluster : Random.Seed -> Time -> Int -> Float -> List ( Time, Enemy )
@@ -217,36 +214,3 @@ initCluster seed timeToSpawn numEnemies angle =
                   }
                 )
             )
-
-
-initEnemies : ( Int, Int ) -> Random.Seed -> ( List Enemy, Random.Seed )
-initEnemies ( viewportWidth, viewportHeight ) seed =
-    -- for debugging mainly
-    let
-        spacing =
-            10
-
-        frac =
-            8
-    in
-    List.range (round (toFloat viewportWidth / frac) // -spacing) (round (toFloat viewportWidth / frac) // spacing)
-        |> List.map
-            (\w ->
-                List.range (round (toFloat viewportHeight / frac) // -spacing) (round (toFloat viewportHeight / frac) // spacing)
-                    |> List.map
-                        (\h ->
-                            { pos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
-                            , lastPos = V2.fromTuple ( toFloat w * spacing, toFloat h * spacing )
-                            , rad = 2
-                            , state = Alive
-                            , seed = seed
-                            , lastAteAt = 0
-                            }
-                        )
-            )
-        |> List.concat
-        |> (\e -> ( e, seed ))
-
-
-
---Random.step (Random.list 10 enemyGenerator) seed

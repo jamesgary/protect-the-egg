@@ -24,10 +24,10 @@ eggBorder =
 
 colors =
     { sand = Color.rgb 248 233 156
-    , shellBorder = Color.rgb 50 120 30 --21 93 1
-    , shellInner = Color.rgb 127 255 89 --(57, 220, 10)
-    , durdleSkin = Color.rgb 255 255 0 --219 255 70
-    , durdleSkinBorder = Color.rgb 180 160 0 --220 200 0 --219 255 70
+    , shellBorder = Color.rgb 50 120 30
+    , shellInner = Color.rgb 127 255 89
+    , durdleSkin = Color.rgb 255 255 0
+    , durdleSkinBorder = Color.rgb 180 160 0
     , eyeFill = Color.rgb 255 255 255
     , eyePupil = Color.rgb 0 0 0
     , beachBg = Color.rgb 248 233 156
@@ -530,7 +530,7 @@ viewEnemy resources curTime { pos, rad, state, seed } =
                 opacity =
                     0.8 - (0.8 * progress)
 
-                -- List (Float, Float, Float)
+                -- particles is a List (Float, Float, Float)
                 -- [(angle, size, speed)]
                 ( particles, _ ) =
                     Random.step
@@ -579,8 +579,6 @@ viewEffect curTime ({ expTime, kind, pos, seed } as effect) =
                 opacity =
                     0.9 - (0.9 * progress)
 
-                -- List (Float, Float, Float)
-                -- [(angle, sizeMod, speed)]
                 ( particles, _ ) =
                     Random.step
                         (Random.list 10

@@ -24,10 +24,6 @@ main =
         }
 
 
-
--- MODEL
-
-
 enemySpeed =
     0.02
 

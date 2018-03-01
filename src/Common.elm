@@ -191,7 +191,6 @@ quabSpawnDist =
 
 
 camera =
-    --Camera.fixedHeight (16 * 9) ( 0, 0 )
     Camera.fixedArea (200 * 200) ( 0, 0 )
 
 
