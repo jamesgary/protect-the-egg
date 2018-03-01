@@ -17,7 +17,7 @@ init { viewportWidth, viewportHeight, timestamp } =
         seed =
             Random.initialSeed timestamp
 
-        ( enemies, newSeed ) =
+        ( quabs, newSeed ) =
             ( [], seed )
 
         ( canvasSize, sidebarWidth ) =
@@ -27,7 +27,7 @@ init { viewportWidth, viewportHeight, timestamp } =
     , viewportHeight = viewportHeight
     , sidebarWidth = sidebarWidth
     , canvasSize = canvasSize
-    , hero =
+    , durdle =
         { state = Shield
         , pos = startingPos
         , lastPos = startingPos
@@ -37,18 +37,18 @@ init { viewportWidth, viewportHeight, timestamp } =
         , thickness = 1
         , vel = V2.fromTuple ( 0, 0 )
         }
-    , enemies = enemies
+    , quabs = quabs
     , seed = newSeed
     , timeSinceLastSpawn = 0
     , curTime = 0
     , config =
-        { heroLength = 20
-        , heroThickness = 5
-        , enemySpeed = 3
-        , enemySpawnRate = 0.5
-        , enemyClusterSize = 3
+        { durdleLength = 20
+        , durdleThickness = 5
+        , quabSpeed = 3
+        , quabSpawnRate = 0.5
+        , quabClusterSize = 3
         }
-    , qEnemies = initQueuedEnemies ( viewportWidth, viewportHeight ) seed
+    , qQuabs = initQueuedQuabs ( viewportWidth, viewportHeight ) seed
     , mousePos = startingPos
     , resources = Resources.init
     , cmds = []
@@ -68,13 +68,13 @@ init { viewportWidth, viewportHeight, timestamp } =
 
 
 tryAgain : Model -> Model
-tryAgain ({ hero, seed, viewportWidth, viewportHeight } as model) =
+tryAgain ({ durdle, seed, viewportWidth, viewportHeight } as model) =
     { model
-        | hero = { hero | state = Shield }
-        , enemies = []
+        | durdle = { durdle | state = Shield }
+        , quabs = []
         , timeSinceLastSpawn = 0
         , curTime = 0
-        , qEnemies = initQueuedEnemies ( viewportWidth, viewportHeight ) seed
+        , qQuabs = initQueuedQuabs ( viewportWidth, viewportHeight ) seed
         , kaiju = 0
         , numEggs = 12
         , state = Playing
@@ -82,8 +82,8 @@ tryAgain ({ hero, seed, viewportWidth, viewportHeight } as model) =
     }
 
 
-initQueuedEnemies : ( Int, Int ) -> Random.Seed -> List ( Time, Enemy )
-initQueuedEnemies ( viewportWidth, viewportHeight ) seed =
+initQueuedQuabs : ( Int, Int ) -> Random.Seed -> List ( Time, Quab )
+initQueuedQuabs ( viewportWidth, viewportHeight ) seed =
     let
         wave1Time =
             5000
@@ -115,7 +115,7 @@ initQueuedEnemies ( viewportWidth, viewportHeight ) seed =
         bottom =
             turns -0.25
     in
-    -- initCluster seed timeToSpawn numEnemies angle
+    -- initCluster seed timeToSpawn numQuabs angle
     [ -- wave 1, single quabs from top
       initCluster seed (wave1Time + 0) 1 (top + twelvth)
     , initCluster seed (wave1Time + 1000) 1 top
@@ -190,9 +190,9 @@ initQueuedEnemies ( viewportWidth, viewportHeight ) seed =
         |> List.sortBy Tuple.first
 
 
-initCluster : Random.Seed -> Time -> Int -> Float -> List ( Time, Enemy )
-initCluster seed timeToSpawn numEnemies angle =
-    List.range 1 numEnemies
+initCluster : Random.Seed -> Time -> Int -> Float -> List ( Time, Quab )
+initCluster seed timeToSpawn numQuabs angle =
+    List.range 1 numQuabs
         |> List.map
             (\i ->
                 let

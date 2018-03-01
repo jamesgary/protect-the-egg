@@ -14,14 +14,14 @@ type alias Model =
     , viewportHeight : Int
     , canvasSize : Int
     , sidebarWidth : Int
-    , hero : Hero
-    , enemies : List Enemy
+    , durdle : Durdle
+    , quabs : List Quab
     , seed : Random.Seed
     , timeSinceLastSpawn : Time
     , curTime : Time
     , config : Config
     , mousePos : Vec2
-    , qEnemies : List ( Time, Enemy ) -- queued enemies
+    , qQuabs : List ( Time, Quab ) -- queued quabs
     , resources : Resources
     , cmds : List (Cmd Msg)
     , kaiju : Float
@@ -53,11 +53,11 @@ type EffectKind
 
 
 type alias Config =
-    { heroLength : Float
-    , heroThickness : Float
-    , enemySpeed : Float
-    , enemySpawnRate : Float
-    , enemyClusterSize : Int
+    { durdleLength : Float
+    , durdleThickness : Float
+    , quabSpeed : Float
+    , quabSpawnRate : Float
+    , quabClusterSize : Int
     }
 
 
@@ -68,8 +68,8 @@ type alias Flag =
     }
 
 
-type alias Hero =
-    { state : HeroState
+type alias Durdle =
+    { state : DurdleState
     , pos : Vec2
     , lastPos : Vec2
     , vel : Vec2
@@ -80,22 +80,22 @@ type alias Hero =
     }
 
 
-type HeroState
+type DurdleState
     = Shield
     | Sword
 
 
-type alias Enemy =
+type alias Quab =
     { pos : Vec2
     , lastPos : Vec2
     , rad : Float
-    , state : EnemyState
+    , state : QuabState
     , seed : Random.Seed
     , lastAteAt : Time
     }
 
 
-type EnemyState
+type QuabState
     = Alive
     | Bouncing Float
     | Exploding Time
@@ -115,11 +115,11 @@ type Msg
     | MouseClick Mouse.Point
     | Tick Time
     | TogglePause
-    | ChangeHeroLength String
-    | ChangeHeroThickness String
-    | ChangeEnemySpawnRate String
-    | ChangeEnemySpeed String
-    | ChangeEnemyClusterSize String
+    | ChangeDurdleLength String
+    | ChangeDurdleThickness String
+    | ChangeQuabSpawnRate String
+    | ChangeQuabSpeed String
+    | ChangeQuabClusterSize String
     | WindowChanged ( Int, Int )
     | Resources Resources.Msg
     | MouseOnStartBtn
@@ -128,14 +128,14 @@ type Msg
     | TryAgain
 
 
-getHeroSweepQuadPoints : Config -> Hero -> ( Vec2, Vec2, Vec2, Vec2 )
-getHeroSweepQuadPoints { heroLength } { pos, lastPos, length, angle, lastAngle } =
+getDurdleSweepQuadPoints : Config -> Durdle -> ( Vec2, Vec2, Vec2, Vec2 )
+getDurdleSweepQuadPoints { durdleLength } { pos, lastPos, length, angle, lastAngle } =
     let
         ( rotOffsetX, rotOffsetY ) =
-            fromPolar ( heroLength * length / 2, angle )
+            fromPolar ( durdleLength * length / 2, angle )
 
         ( rotOffsetXLast, rotOffsetYLast ) =
-            fromPolar ( heroLength * length / 2, lastAngle )
+            fromPolar ( durdleLength * length / 2, lastAngle )
 
         ( x, y ) =
             V2.toTuple pos
@@ -163,14 +163,14 @@ getHeroSweepQuadPoints { heroLength } { pos, lastPos, length, angle, lastAngle }
 -- config applications
 
 
-trueLength : Config -> Hero -> Float
-trueLength { heroLength } { length } =
-    heroLength * length
+trueLength : Config -> Durdle -> Float
+trueLength { durdleLength } { length } =
+    durdleLength * length
 
 
-trueThickness : Config -> Hero -> Float
-trueThickness { heroThickness } { thickness } =
-    heroThickness * thickness
+trueThickness : Config -> Durdle -> Float
+trueThickness { durdleThickness } { thickness } =
+    durdleThickness * thickness
 
 
 nestRad =
@@ -234,5 +234,5 @@ nestPos =
     V2.fromTuple ( 0, 0 )
 
 
-enemyStartingDistFromNest =
+quabStartingDistFromNest =
     150

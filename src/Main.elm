@@ -24,19 +24,19 @@ main =
         }
 
 
-enemySpeed =
+quabSpeed =
     0.02
 
 
-clusterGenerator : Config -> Random.Generator (List Enemy)
-clusterGenerator { enemyClusterSize } =
+clusterGenerator : Config -> Random.Generator (List Quab)
+clusterGenerator { quabClusterSize } =
     Random.float 0 (turns 1)
         |> Random.map
             (\angle ->
-                List.range 0 (enemyClusterSize - 1)
+                List.range 0 (quabClusterSize - 1)
                     |> List.map
                         (\i ->
-                            fromPolar ( enemyStartingDistFromNest + (5 * toFloat i), angle )
+                            fromPolar ( quabStartingDistFromNest + (5 * toFloat i), angle )
                                 |> (\( x, y ) ->
                                         { pos = V2.fromTuple ( x, y )
                                         , lastPos = V2.fromTuple ( x, y )
@@ -50,24 +50,24 @@ clusterGenerator { enemyClusterSize } =
             )
 
 
-toggleState : Hero -> Hero
-toggleState ({ state, angle } as hero) =
+toggleState : Durdle -> Durdle
+toggleState ({ state, angle } as durdle) =
     case state of
         Sword ->
-            { hero | state = Shield, angle = angle - turns 0.25 }
+            { durdle | state = Shield, angle = angle - turns 0.25 }
 
         Shield ->
-            { hero | state = Sword, angle = angle + turns 0.25 }
+            { durdle | state = Sword, angle = angle + turns 0.25 }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ hero, config, state } as model) =
+update msg ({ durdle, config, state } as model) =
     case msg of
         MouseClick mousePos ->
             { model
-                | hero =
-                    toggleState hero
-                        |> (\hero -> { hero | pos = trueMousePos model mousePos })
+                | durdle =
+                    toggleState durdle
+                        |> (\durdle -> { durdle | pos = trueMousePos model mousePos })
             }
                 ! []
 
@@ -99,57 +99,57 @@ update msg ({ hero, config, state } as model) =
                 _ ->
                     { model | state = Paused } ! [ pauseSong () ]
 
-        ChangeHeroLength inputStr ->
+        ChangeDurdleLength inputStr ->
             let
                 newConfig =
                     { config
-                        | heroLength =
+                        | durdleLength =
                             String.toFloat inputStr
-                                |> Result.withDefault config.heroLength
+                                |> Result.withDefault config.durdleLength
                     }
             in
             { model | config = newConfig } ! []
 
-        ChangeHeroThickness inputStr ->
+        ChangeDurdleThickness inputStr ->
             let
                 newConfig =
                     { config
-                        | heroThickness =
+                        | durdleThickness =
                             String.toFloat inputStr
-                                |> Result.withDefault config.heroThickness
+                                |> Result.withDefault config.durdleThickness
                     }
             in
             { model | config = newConfig } ! []
 
-        ChangeEnemySpeed inputStr ->
+        ChangeQuabSpeed inputStr ->
             let
                 newConfig =
                     { config
-                        | enemySpeed =
+                        | quabSpeed =
                             String.toFloat inputStr
-                                |> Result.withDefault config.enemySpeed
+                                |> Result.withDefault config.quabSpeed
                     }
             in
             { model | config = newConfig } ! []
 
-        ChangeEnemySpawnRate inputStr ->
+        ChangeQuabSpawnRate inputStr ->
             let
                 newConfig =
                     { config
-                        | enemySpawnRate =
+                        | quabSpawnRate =
                             String.toFloat inputStr
-                                |> Result.withDefault config.enemySpawnRate
+                                |> Result.withDefault config.quabSpawnRate
                     }
             in
             { model | config = newConfig } ! []
 
-        ChangeEnemyClusterSize inputStr ->
+        ChangeQuabClusterSize inputStr ->
             let
                 newConfig =
                     { config
-                        | enemyClusterSize =
+                        | quabClusterSize =
                             String.toInt inputStr
-                                |> Result.withDefault config.enemyClusterSize
+                                |> Result.withDefault config.quabClusterSize
                     }
             in
             { model | config = newConfig } ! []
@@ -198,26 +198,26 @@ trueMousePos { viewportWidth, viewportHeight } { x, y } =
            )
 
 
-hiltPosFromHero : Config -> Hero -> Vec2
-hiltPosFromHero config hero =
-    case hero.state of
+hiltPosFromDurdle : Config -> Durdle -> Vec2
+hiltPosFromDurdle config durdle =
+    case durdle.state of
         Shield ->
-            hero.pos
+            durdle.pos
 
         Sword ->
-            fromPolar ( trueLength config hero / 2, hero.angle )
+            fromPolar ( trueLength config durdle / 2, durdle.angle )
                 |> V2.fromTuple
-                |> V2.sub hero.pos
+                |> V2.sub durdle.pos
 
 
-heroPosFromHilt : Config -> Hero -> Vec2 -> Vec2
-heroPosFromHilt config hero hiltPos =
-    case hero.state of
+durdlePosFromHilt : Config -> Durdle -> Vec2 -> Vec2
+durdlePosFromHilt config durdle hiltPos =
+    case durdle.state of
         Shield ->
             hiltPos
 
         Sword ->
-            fromPolar ( trueLength config hero / 2, hero.angle )
+            fromPolar ( trueLength config durdle / 2, durdle.angle )
                 |> V2.fromTuple
                 |> V2.add hiltPos
 
@@ -269,15 +269,15 @@ moveHilt timeDelta oldPos oldVel targetPos =
         ( newPos, newVelocity )
 
 
-moveHero : Time -> Model -> Model
-moveHero timeDelta ({ config, hero, mousePos } as model) =
+moveDurdle : Time -> Model -> Model
+moveDurdle timeDelta ({ config, durdle, mousePos } as model) =
     let
         -- hilt is the mouse-controllable point
         hiltPos =
-            hiltPosFromHero config hero
+            hiltPosFromDurdle config durdle
 
         ( newHiltPos, newVel ) =
-            moveHilt timeDelta hiltPos hero.vel mousePos
+            moveHilt timeDelta hiltPos durdle.vel mousePos
 
         aroundNestPos =
             newHiltPos
@@ -296,7 +296,7 @@ moveHero timeDelta ({ config, hero, mousePos } as model) =
                    )
 
         angle =
-            case hero.state of
+            case durdle.state of
                 Shield ->
                     V2.sub nestPos aroundNestPos
                         |> V2.toTuple
@@ -313,28 +313,28 @@ moveHero timeDelta ({ config, hero, mousePos } as model) =
                                 angle + turns 0.5
                            )
 
-        newHero =
-            { hero
-                | pos = heroPosFromHilt config { hero | angle = angle } aroundNestPos
-                , lastPos = hero.pos
+        newDurdle =
+            { durdle
+                | pos = durdlePosFromHilt config { durdle | angle = angle } aroundNestPos
+                , lastPos = durdle.pos
                 , vel = newVel
                 , angle = angle
-                , lastAngle = hero.angle
+                , lastAngle = durdle.angle
             }
     in
-    { model | hero = newHero }
+    { model | durdle = newDurdle }
 
 
 tick : Time -> Model -> ( Model, Cmd Msg )
-tick timeDelta ({ config, enemies, hero, timeSinceLastSpawn, seed, mousePos } as model) =
+tick timeDelta ({ config, quabs, durdle, timeSinceLastSpawn, seed, mousePos } as model) =
     model
         |> updateCurTime timeDelta
         |> exhaustKaiju timeDelta
-        |> moveHero timeDelta
-        |> spawnEnemies
-        |> moveEnemies timeDelta
-        |> collideHeroAndEnemies
-        |> removeDeadEnemies
+        |> moveDurdle timeDelta
+        |> spawnQuabs
+        |> moveQuabs timeDelta
+        |> collideDurdleAndQuabs
+        |> removeDeadQuabs
         |> eatEggs
         |> checkGameOver
         |> checkVictory
@@ -342,8 +342,8 @@ tick timeDelta ({ config, enemies, hero, timeSinceLastSpawn, seed, mousePos } as
 
 
 exhaustKaiju : Time -> Model -> Model
-exhaustKaiju timeDelta ({ kaiju, hero } as model) =
-    case hero.state of
+exhaustKaiju timeDelta ({ kaiju, durdle } as model) =
+    case durdle.state of
         Shield ->
             model
 
@@ -354,8 +354,8 @@ exhaustKaiju timeDelta ({ kaiju, hero } as model) =
             in
             { model
                 | kaiju = kaijuRemaining
-                , hero =
-                    { hero
+                , durdle =
+                    { durdle
                         | state =
                             if kaijuRemaining > 0 then
                                 Sword
@@ -375,24 +375,24 @@ updateCurTime timeDelta ({ curTime } as model) =
     { model | curTime = curTime + timeDelta }
 
 
-spawnEnemies : Model -> Model
-spawnEnemies ({ enemies, qEnemies, curTime, effects, cmds } as model) =
-    case qEnemies of
+spawnQuabs : Model -> Model
+spawnQuabs ({ quabs, qQuabs, curTime, effects, cmds } as model) =
+    case qQuabs of
         [] ->
             model
 
-        ( timeToSpawn, enemy ) :: tail ->
+        ( timeToSpawn, quab ) :: tail ->
             if timeToSpawn <= curTime then
-                spawnEnemies
+                spawnQuabs
                     { model
-                        | enemies = enemy :: enemies
-                        , qEnemies = tail
+                        | quabs = quab :: quabs
+                        , qQuabs = tail
                         , cmds = playWav "crab-hello.wav" :: cmds
                         , effects =
                             { expTime = curTime + splashLongevity
-                            , pos = enemy.pos
+                            , pos = quab.pos
                             , kind = Splash
-                            , seed = enemy.seed
+                            , seed = quab.seed
                             }
                                 :: effects
                     }
@@ -400,47 +400,47 @@ spawnEnemies ({ enemies, qEnemies, curTime, effects, cmds } as model) =
                 model
 
 
-moveEnemies : Time -> Model -> Model
-moveEnemies timeDelta ({ enemies, config } as model) =
-    { model | enemies = List.map (moveEnemyCloserToNest config timeDelta) enemies }
+moveQuabs : Time -> Model -> Model
+moveQuabs timeDelta ({ quabs, config } as model) =
+    { model | quabs = List.map (moveQuabCloserToNest config timeDelta) quabs }
 
 
-collideHeroAndEnemies : Model -> Model
-collideHeroAndEnemies ({ config, hero, enemies, curTime, kaiju, cmds } as model) =
+collideDurdleAndQuabs : Model -> Model
+collideDurdleAndQuabs ({ config, durdle, quabs, curTime, kaiju, cmds } as model) =
     let
-        ( newEnemies, numCollidedEnemies ) =
-            enemies
-                |> List.map (collideWithHero config curTime hero)
-                |> (\listOfEnemiesAndDidCollide ->
-                        ( listOfEnemiesAndDidCollide
+        ( newQuabs, numCollidedQuabs ) =
+            quabs
+                |> List.map (collideWithDurdle config curTime durdle)
+                |> (\listOfQuabsAndDidCollide ->
+                        ( listOfQuabsAndDidCollide
                             |> List.map Tuple.first
-                        , listOfEnemiesAndDidCollide
+                        , listOfQuabsAndDidCollide
                             |> List.filter Tuple.second
                             |> List.length
                         )
                    )
 
-        newHero =
-            if numCollidedEnemies > 0 then
-                bumpHero hero
+        newDurdle =
+            if numCollidedQuabs > 0 then
+                bumpDurdle durdle
             else
-                hero
+                durdle
     in
     { model
-        | enemies = newEnemies
-        , hero = newHero
-        , kaiju = kaiju + 2 * toFloat numCollidedEnemies
+        | quabs = newQuabs
+        , durdle = newDurdle
+        , kaiju = kaiju + 2 * toFloat numCollidedQuabs
         , cmds =
-            if numCollidedEnemies > 0 then
+            if numCollidedQuabs > 0 then
                 playWav "crab-death.wav" :: cmds
             else
                 cmds
     }
 
 
-removeDeadEnemies : Model -> Model
-removeDeadEnemies ({ enemies, config, curTime } as model) =
-    { model | enemies = List.filter (isAlive config curTime) enemies }
+removeDeadQuabs : Model -> Model
+removeDeadQuabs ({ quabs, config, curTime } as model) =
+    { model | quabs = List.filter (isAlive config curTime) quabs }
 
 
 munchTime =
@@ -448,8 +448,8 @@ munchTime =
 
 
 eatEggs : Model -> Model
-eatEggs ({ enemies, curTime, numEggs, cmds } as model) =
-    enemies
+eatEggs ({ quabs, curTime, numEggs, cmds } as model) =
+    quabs
         |> List.map
             (\quab ->
                 if doesCollideWithNest quab && (quab.lastAteAt + munchTime < curTime) then
@@ -457,13 +457,13 @@ eatEggs ({ enemies, curTime, numEggs, cmds } as model) =
                 else
                     ( quab, False )
             )
-        |> (\enemiesAndDidEat ->
+        |> (\quabsAndDidEat ->
                 let
                     numEggsEaten =
-                        enemiesAndDidEat |> List.filter Tuple.second |> List.length
+                        quabsAndDidEat |> List.filter Tuple.second |> List.length
                 in
                 { model
-                    | enemies = List.map Tuple.first enemiesAndDidEat
+                    | quabs = List.map Tuple.first quabsAndDidEat
                     , numEggs = numEggs - numEggsEaten
                     , cmds =
                         if numEggsEaten > 0 then
@@ -493,9 +493,9 @@ checkVictory ({ curTime, cmds } as model) =
         { model | state = Victory, cmds = victory () :: cmds }
 
 
-isAlive : Config -> Time -> Enemy -> Bool
-isAlive config curTime enemy =
-    case enemy.state of
+isAlive : Config -> Time -> Quab -> Bool
+isAlive config curTime quab =
+    case quab.state of
         Alive ->
             True
 
@@ -507,103 +507,103 @@ isAlive config curTime enemy =
             expTime > curTime
 
 
-doesCollideWithNest : Enemy -> Bool
-doesCollideWithNest enemy =
-    case enemy.state of
+doesCollideWithNest : Quab -> Bool
+doesCollideWithNest quab =
+    case quab.state of
         Alive ->
-            Math.dist nestPos enemy.pos < (nestRad + enemy.rad)
+            Math.dist nestPos quab.pos < (nestRad + quab.rad)
 
         _ ->
             False
 
 
-collideWithHero : Config -> Time -> Hero -> Enemy -> ( Enemy, Bool )
-collideWithHero config curTime hero enemy =
-    case enemy.state of
+collideWithDurdle : Config -> Time -> Durdle -> Quab -> ( Quab, Bool )
+collideWithDurdle config curTime durdle quab =
+    case quab.state of
         Alive ->
-            if isTouchingHero config hero enemy then
-                ( { enemy
+            if isTouchingDurdle config durdle quab then
+                ( { quab
                     | state =
                         if True then
                             Exploding (curTime + explosionLongevity)
                         else
                             Bouncing
-                                (V2.sub enemy.pos enemy.lastPos
+                                (V2.sub quab.pos quab.lastPos
                                     |> V2.negate
                                     |> V2.toTuple
                                     |> toPolar
                                     |> (\( r, a ) ->
-                                            ((hero.angle + turns 0.25) - a)
-                                                + (hero.angle + turns 0.25)
+                                            ((durdle.angle + turns 0.25) - a)
+                                                + (durdle.angle + turns 0.25)
                                        )
                                 )
                   }
                 , True
                 )
             else
-                ( enemy, False )
+                ( quab, False )
 
         Bouncing _ ->
-            ( enemy, False )
+            ( quab, False )
 
         Exploding _ ->
-            ( enemy, False )
+            ( quab, False )
 
 
 baseSpeed =
     0.01
 
 
-bumpHero : Hero -> Hero
-bumpHero hero =
+bumpDurdle : Durdle -> Durdle
+bumpDurdle durdle =
     let
         ( nestX, nestY ) =
             V2.toTuple nestPos
 
-        ( heroX, heroY ) =
-            V2.toTuple hero.pos
+        ( durdleX, durdleY ) =
+            V2.toTuple durdle.pos
     in
-    toPolar ( nestX - heroX, nestY - heroY )
+    toPolar ( nestX - durdleX, nestY - durdleY )
         |> (\( _, angle ) -> fromPolar ( 3, angle ))
         |> (\( x, y ) ->
-                { hero | pos = V2.fromTuple ( heroX + x, heroY + y ) }
+                { durdle | pos = V2.fromTuple ( durdleX + x, durdleY + y ) }
            )
 
 
-moveEnemyCloserToNest : Config -> Time -> Enemy -> Enemy
-moveEnemyCloserToNest config timeDelta enemy =
-    case enemy.state of
+moveQuabCloserToNest : Config -> Time -> Quab -> Quab
+moveQuabCloserToNest config timeDelta quab =
+    case quab.state of
         Alive ->
-            if doesCollideWithNest enemy then
-                enemy
+            if doesCollideWithNest quab then
+                quab
             else
                 let
                     ( nestX, nestY ) =
                         V2.toTuple nestPos
 
-                    ( enemyX, enemyY ) =
-                        V2.toTuple enemy.pos
+                    ( quabX, quabY ) =
+                        V2.toTuple quab.pos
                 in
-                toPolar ( nestX - enemyX, nestY - enemyY )
-                    |> (\( _, angle ) -> fromPolar ( timeDelta * config.enemySpeed * baseSpeed, angle ))
+                toPolar ( nestX - quabX, nestY - quabY )
+                    |> (\( _, angle ) -> fromPolar ( timeDelta * config.quabSpeed * baseSpeed, angle ))
                     |> (\( x, y ) ->
-                            { enemy
-                                | pos = V2.fromTuple ( enemyX + x, enemyY + y )
-                                , lastPos = enemy.pos
+                            { quab
+                                | pos = V2.fromTuple ( quabX + x, quabY + y )
+                                , lastPos = quab.pos
                             }
                        )
 
         Bouncing angle ->
-            { enemy
+            { quab
                 | pos =
-                    fromPolar ( timeDelta * config.enemySpeed * baseSpeed, angle )
+                    fromPolar ( timeDelta * config.quabSpeed * baseSpeed, angle )
                         |> V2.fromTuple
-                        |> V2.add enemy.pos
-                , lastPos = enemy.pos
+                        |> V2.add quab.pos
+                , lastPos = quab.pos
             }
 
         _ ->
-            enemy
+            quab
 
 
 
@@ -623,15 +623,15 @@ subscriptions ({ state } as model) =
         ]
 
 
-isTouchingHero : Config -> Hero -> Enemy -> Bool
-isTouchingHero ({ heroLength, heroThickness } as config) hero enemy =
+isTouchingDurdle : Config -> Durdle -> Quab -> Bool
+isTouchingDurdle ({ durdleLength, durdleThickness } as config) durdle quab =
     -- check if distance between
     let
         ( a, b, c, d ) =
-            getHeroSweepQuadPoints config hero
+            getDurdleSweepQuadPoints config durdle
 
         ( e, f ) =
-            ( enemy.pos, enemy.lastPos )
+            ( quab.pos, quab.lastPos )
 
         minDist =
             List.minimum
@@ -642,5 +642,5 @@ isTouchingHero ({ heroLength, heroThickness } as config) hero enemy =
                 ]
                 |> Maybe.withDefault -42
     in
-    (minDist <= (heroThickness * hero.thickness / 2) + enemy.rad)
-        || (List.length (List.filter (Math.doLinesIntersect ( enemy.pos, V2.fromTuple ( -1000, -1000 ) )) [ ( a, b ), ( b, c ), ( c, d ), ( d, a ) ]) % 2 == 1)
+    (minDist <= (durdleThickness * durdle.thickness / 2) + quab.rad)
+        || (List.length (List.filter (Math.doLinesIntersect ( quab.pos, V2.fromTuple ( -1000, -1000 ) )) [ ( a, b ), ( b, c ), ( c, d ), ( d, a ) ]) % 2 == 1)

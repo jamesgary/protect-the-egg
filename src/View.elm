@@ -36,7 +36,7 @@ colors =
 
 
 view : Model -> Html Msg
-view ({ hero, enemies, config, curTime, canvasSize, resources, state, viewportWidth, viewportHeight, isStartBtnHovered, effects, numEggs } as model) =
+view ({ durdle, quabs, config, curTime, canvasSize, resources, state, viewportWidth, viewportHeight, isStartBtnHovered, effects, numEggs } as model) =
     div [ class "container" ]
         (case state of
             Start ->
@@ -106,8 +106,8 @@ view ({ hero, enemies, config, curTime, canvasSize, resources, state, viewportWi
                             }
                             (List.concat
                                 [ viewEggs numEggs
-                                , viewHero model
-                                , List.concat (List.map (viewEnemy resources curTime) enemies)
+                                , viewDurdle model
+                                , List.concat (List.map (viewQuab resources curTime) quabs)
                                 , List.concat (List.map (viewEffect curTime) effects)
                                 ]
                             )
@@ -120,7 +120,7 @@ view ({ hero, enemies, config, curTime, canvasSize, resources, state, viewportWi
 
 
 renderTextEffects : Model -> Html Msg
-renderTextEffects ({ enemies } as model) =
+renderTextEffects ({ quabs } as model) =
     div [ class "text-effects-container" ]
         [ div [ class "text-effect" ] [ text "+1" ]
         ]
@@ -299,9 +299,9 @@ borderWidth =
     1
 
 
-viewHero : Model -> List Renderable
-viewHero model =
-    case model.hero.state of
+viewDurdle : Model -> List Renderable
+viewDurdle model =
+    case model.durdle.state of
         Shield ->
             viewShield model
 
@@ -310,16 +310,16 @@ viewHero model =
 
 
 viewShield : Model -> List Renderable
-viewShield { hero, config, resources, mousePos } =
+viewShield { durdle, config, resources, mousePos } =
     let
         { state, pos, lastPos, angle, lastAngle, length, thickness } =
-            hero
+            durdle
 
         tl =
-            trueLength config hero
+            trueLength config durdle
 
         tt =
-            trueThickness config hero
+            trueThickness config durdle
 
         sideOffset =
             fromPolar ( tl / 2, angle )
@@ -412,16 +412,16 @@ viewShield { hero, config, resources, mousePos } =
 
 
 viewSword : Model -> List Renderable
-viewSword { hero, config, resources, mousePos } =
+viewSword { durdle, config, resources, mousePos } =
     let
         { state, pos, lastPos, angle, lastAngle, length, thickness } =
-            hero
+            durdle
 
         tl =
-            trueLength config hero
+            trueLength config durdle
 
         tt =
-            trueThickness config hero
+            trueThickness config durdle
 
         ( x, y ) =
             V2.toTuple pos
@@ -439,7 +439,7 @@ viewSword { hero, config, resources, mousePos } =
         ]
 
 
-heroColor =
+durdleColor =
     Color.rgb 20 130 80
 
 
@@ -480,8 +480,8 @@ quabFrames =
         |> Array.fromList
 
 
-viewEnemy : Resources -> Time -> Enemy -> List Renderable
-viewEnemy resources curTime { pos, rad, state, seed } =
+viewQuab : Resources -> Time -> Quab -> List Renderable
+viewQuab resources curTime { pos, rad, state, seed } =
     case state of
         Alive ->
             [ let
